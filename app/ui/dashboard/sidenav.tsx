@@ -1,7 +1,7 @@
-import React from 'react';
-import Link from 'next/link';
+import React from 'react'
+import Link from 'next/link'
 
-const SideNav = () => {
+const SideNav = (): React.JSX.Element => {
   return (
     <nav className="bg-gray-800 w-64 h-screen">
       <ul className="p-4">
@@ -16,7 +16,7 @@ const SideNav = () => {
         </li>
       </ul>
     </nav>
-  );
-};
+  )
+}
 
-export default SideNav;
+export default SideNav

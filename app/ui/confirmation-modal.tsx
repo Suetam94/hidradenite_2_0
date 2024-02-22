@@ -1,14 +1,14 @@
-import React from 'react';
+import React from 'react'
 
 interface IConfirmationModal {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: () => void;
+  isOpen: boolean
+  onClose: () => void
+  onSave: () => void
 }
 
-const ConfirmationModal = ({ isOpen, onClose, onSave }: IConfirmationModal) => {
+const ConfirmationModal = ({ isOpen, onClose, onSave }: IConfirmationModal): React.JSX.Element | null => {
   if (!isOpen) {
-    return null;
+    return null
   }
 
   return (
@@ -32,7 +32,7 @@ const ConfirmationModal = ({ isOpen, onClose, onSave }: IConfirmationModal) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ConfirmationModal;
+export default ConfirmationModal

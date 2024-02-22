@@ -2,7 +2,7 @@ import React from 'react'
 import DashboardForm from '@/app/ui/dashboard/dashboard-form'
 import DashboardFormImage from '@/app/ui/dashboard/dashboard-form-image'
 
-const Page = () => {
+const Page = (): React.JSX.Element => {
   return (
     <div>
       <h2 className="text-xl font-bold mb-4 text-base-blue">Editando a página inicial</h2>

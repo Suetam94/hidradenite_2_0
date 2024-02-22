@@ -1,6 +1,7 @@
+import React from 'react'
 import DashboardCard from '@/app/ui/dashboard/dashboard-card'
 
-export default async function Page() {
+export default async function Page (): Promise<React.JSX.Element> {
   return (
     <main>
       <h1 className="mb-4 text-xl md:text-2xl">Dashboard</h1>

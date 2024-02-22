@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import './globals.css'
 import Header from '@/app/ui/header'
 import Footer from '@/app/ui/footer'
-import type {Metadata} from "next";
+import type { Metadata } from 'next'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -21,8 +21,8 @@ export const metadata: Metadata = {
 
 }
 
-export default function RootLayout({
-  children,
+export default function RootLayout ({
+  children
 }: Readonly<{
   children: React.ReactNode
 }>): React.JSX.Element {

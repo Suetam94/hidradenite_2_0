@@ -6,9 +6,9 @@ const DashboardFormImage: React.FC = () => {
   const [image, setImage] = useState<string | null>(null)
   const [file, setFile] = useState<File | null>(null)
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const selectedFile = e.target.files?.[0]
-    if (selectedFile) {
+    if (selectedFile != null) {
       const reader = new FileReader()
       reader.onload = () => {
         const dataURL = reader.result as string
@@ -19,8 +19,8 @@ const DashboardFormImage: React.FC = () => {
     }
   }
 
-  const handleDownload = () => {
-    if (image) {
+  const handleDownload = (): void => {
+    if (image != null) {
       const a = document.createElement('a')
       a.href = image
       a.download = 'image.png'
@@ -30,14 +30,14 @@ const DashboardFormImage: React.FC = () => {
     }
   }
 
-  const handleClearImage = () => {
-    setImage(null);
-    setFile(null);
-  };
+  const handleClearImage = (): void => {
+    setImage(null)
+    setFile(null)
+  }
 
   return (
     <div className="max-w-full w-full mx-auto">
-      {!image && (
+      {(image == null) && (
         <div>
           <label htmlFor="image" className="block text-lg font-medium mb-2">
             Upload Image
@@ -58,7 +58,7 @@ const DashboardFormImage: React.FC = () => {
           </div>
         </div>
       )}
-      {image && (
+      {(image != null) && (
         <div className="mt-4">
           <img
             src={image}
@@ -68,7 +68,7 @@ const DashboardFormImage: React.FC = () => {
           />
         </div>
       )}
-      {image && (
+      {(image != null) && (
         <div className="mt-4 flex justify-end">
           <button
             type="button"
@@ -89,7 +89,7 @@ const DashboardFormImage: React.FC = () => {
       <div className="mt-4 flex justify-end">
         <button
           type="submit"
-          disabled={!file}
+          disabled={file == null}
           className="bg-[#FFA500] text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none"
         >
           Salvar

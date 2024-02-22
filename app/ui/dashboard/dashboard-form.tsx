@@ -7,29 +7,29 @@ interface IDashboardForm {
   initialValue: string
 }
 
-const DashboardForm = ({ initialValue }: IDashboardForm) => {
+const DashboardForm = ({ initialValue }: IDashboardForm): React.JSX.Element => {
   const [textValue, setTextValue] = useState(initialValue)
   const [isEditing, setIsEditing] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault()
     setIsEditing(false)
     setIsModalOpen(true)
     // Handle form submission here
   }
 
-  const handleEdit = () => {
+  const handleEdit = (): void => {
     setIsEditing(true)
   }
 
-  const handleSave = () => {
+  const handleSave = (): void => {
     setIsModalOpen(false)
     setIsEditing(false)
     // Handle form submission here
   }
 
-  const handleModalClose = () => {
+  const handleModalClose = (): void => {
     setIsModalOpen(false)
   }
 
@@ -41,7 +41,7 @@ const DashboardForm = ({ initialValue }: IDashboardForm) => {
           className="px-4 py-2 w-full h-32 resize-none focus:outline-none"
           placeholder="Enter text..."
           value={textValue}
-          onChange={(e) => setTextValue(e.target.value)}
+          onChange={(e) => { setTextValue(e.target.value) }}
           disabled={!isEditing}
         />
       </div>

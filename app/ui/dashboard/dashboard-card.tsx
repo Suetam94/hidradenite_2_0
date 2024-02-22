@@ -1,13 +1,13 @@
-import React from 'react';
-import Link from "next/link";
+import React from 'react'
+import Link from 'next/link'
 
 interface IDashboardCard {
-  title: string;
-  description: string;
-  route: string;
+  title: string
+  description: string
+  route: string
 }
 
-const DashboardCard = ({ title, description, route }: IDashboardCard) => {
+const DashboardCard = ({ title, description, route }: IDashboardCard): React.JSX.Element => {
   return (
     <div className="bg-white shadow-md rounded-md p-6 mb-4">
       <h3 className="text-xl font-semibold mb-2">{title}</h3>
@@ -18,9 +18,7 @@ const DashboardCard = ({ title, description, route }: IDashboardCard) => {
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default DashboardCard;
-
-
+export default DashboardCard
