@@ -1,0 +1,17 @@
+import React from 'react'
+import DashboardForm from '@/app/ui/dashboard/dashboard-form'
+import DashboardFormImage from '@/app/ui/dashboard/dashboard-form-image'
+
+const Page = () => {
+  return (
+    <div>
+      <h2 className="text-xl font-bold mb-4 text-base-blue">Editando a página inicial</h2>
+      <div className="grid grid-cols-1 gap-y-10">
+        <DashboardFormImage />
+        <DashboardForm initialValue={'teste'} />
+      </div>
+    </div>
+  )
+}
+
+export default Page

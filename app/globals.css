@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  text-decoration: none !important;
+  list-style: none !important;
+}
+
+a {
+  text-decoration: none !important;
+  color: inherit !important;
+}
