@@ -8,7 +8,7 @@ const Page = (): React.JSX.Element => {
       <h2 className="text-xl font-bold mb-4 text-base-blue">Editando a página inicial</h2>
       <div className="grid grid-cols-1 gap-y-10">
         <DashboardFormImage />
-        <DashboardForm initialValue={'teste'} />
+        <DashboardForm page={'home'} contentId={'text-aside-instagram'} />
       </div>
     </div>
   )

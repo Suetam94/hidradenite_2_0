@@ -1,49 +1,78 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ConfirmationModal from '@/app/ui/confirmation-modal'
+import { getPageContentByPageTitle, pageContent } from '@/app/lib/PageContent'
+import { type IDashboardForm } from '@/app/lib/interfaces'
+import Spinner from '@/app/ui/Spinner'
 
-interface IDashboardForm {
-  initialValue: string
-}
-
-const DashboardForm = ({ initialValue }: IDashboardForm): React.JSX.Element => {
-  const [textValue, setTextValue] = useState(initialValue)
+const DashboardForm = ({
+  page,
+  contentId
+}: IDashboardForm): React.JSX.Element => {
+  const [textValue, setTextValue] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    void (async () => {
+      setIsLoading(true)
+      const pageContent = await getPageContentByPageTitle(page)
+      if (pageContent !== null) {
+        const { textContent } = pageContent
+        if (textContent !== null) {
+          setTextValue(textContent)
+        }
+      }
+      setIsLoading(false)
+    })()
+  }, [page])
 
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault()
     setIsEditing(false)
     setIsModalOpen(true)
-    // Handle form submission here
   }
 
   const handleEdit = (): void => {
     setIsEditing(true)
   }
 
-  const handleSave = (): void => {
+  const handleSave = async (answer: boolean): Promise<void> => {
     setIsModalOpen(false)
     setIsEditing(false)
-    // Handle form submission here
-  }
-
-  const handleModalClose = (): void => {
-    setIsModalOpen(false)
+    if (answer) {
+      setIsLoading(true)
+      if (textValue !== undefined) {
+        await pageContent({
+          page,
+          contentId,
+          textContent: textValue
+        }, 'text')
+      }
+    }
+    setIsLoading(false)
   }
 
   return (
     <form onSubmit={handleSubmit} className="w-full mx-auto">
       <label className="block text-lg font-medium mb-2">Texto ao lado do instagram</label>
-      <div className="border border-gray-300 rounded-md overflow-hidden">
-        <textarea
-          className="px-4 py-2 w-full h-32 resize-none focus:outline-none"
-          placeholder="Enter text..."
-          value={textValue}
-          onChange={(e) => { setTextValue(e.target.value) }}
-          disabled={!isEditing}
-        />
+      <div className="border border-gray-300 h-32 rounded-md overflow-hidden flex justify-center items-center">
+        {
+          isLoading
+            ? <Spinner />
+            : <textarea
+              className="px-4 py-2 w-full h-32 resize-none focus:outline-none"
+              placeholder="Enter text..."
+              value={textValue ?? ''}
+              onChange={(e) => {
+                setTextValue(e.target.value)
+              }}
+              disabled={!isEditing}
+              name="textContent"
+            />
+        }
       </div>
       <div className="mt-4 flex justify-end">
         {!isEditing && (
@@ -59,7 +88,7 @@ const DashboardForm = ({ initialValue }: IDashboardForm): React.JSX.Element => {
           Salvar
         </button>
       </div>
-      <ConfirmationModal isOpen={isModalOpen} onClose={handleModalClose} onSave={handleSave}/>
+      <ConfirmationModal isOpen={isModalOpen} onSave={handleSave} />
     </form>
   )
 }

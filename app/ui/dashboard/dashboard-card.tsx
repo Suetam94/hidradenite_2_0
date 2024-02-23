@@ -14,7 +14,7 @@ const DashboardCard = ({ title, description, route }: IDashboardCard): React.JSX
       <p className="text-gray-600 mb-4">{description}</p>
       <div className="flex justify-end">
         <button className="bg-[#2A7CA3] hover:bg-[#7F067F] text-white font-bold py-2 px-4 rounded">
-          <Link href={route}>Editar</Link>
+          <Link href={`dashboard/${route}`}>Editar</Link>
         </button>
       </div>
     </div>

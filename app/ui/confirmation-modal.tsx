@@ -1,12 +1,7 @@
 import React from 'react'
+import { type IConfirmationModal } from '@/app/lib/interfaces'
 
-interface IConfirmationModal {
-  isOpen: boolean
-  onClose: () => void
-  onSave: () => void
-}
-
-const ConfirmationModal = ({ isOpen, onClose, onSave }: IConfirmationModal): React.JSX.Element | null => {
+const ConfirmationModal = ({ isOpen, onSave }: IConfirmationModal): React.JSX.Element | null => {
   if (!isOpen) {
     return null
   }
@@ -19,13 +14,13 @@ const ConfirmationModal = ({ isOpen, onClose, onSave }: IConfirmationModal): Rea
         <div className="flex justify-end">
           <button
             className="bg-red-500 text-white px-4 py-2 mr-2 rounded hover:bg-red-600 focus:outline-none"
-            onClick={onSave}
+            onClick={() => { void onSave(true).then() }}
           >
             Salvar
           </button>
           <button
             className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 focus:outline-none"
-            onClick={onClose}
+            onClick={() => { void onSave(false).then() }}
           >
             Cancelar
           </button>

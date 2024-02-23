@@ -1,0 +1,16 @@
+{
+  "home": {
+    "path": "/",
+    "title": "home",
+    "items": [
+      {
+        "contentId": "main-text",
+        "textContent": "A Hidradenite Supurativa (HS) é uma doença inflamatória crônica que geralmente se manifesta com a formação de nódulos, abscessos, fístulas e cicatrizes, principalmente em áreas de dobras da pele, mas pode afetar\n              qualquer região onde haja pelos. O diagnóstico precoce e o acompanhamento regular com um dermatologista são fundamentais para enfrentar cada fase da HS com maior qualidade de vida."
+      },
+      {
+        "contentId": "main-banner",
+        "mediaContent": "bg-main-banner"
+      }
+    ]
+  }
+}
