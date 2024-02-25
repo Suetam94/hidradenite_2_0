@@ -9,9 +9,9 @@ const Page = (): React.JSX.Element => {
       <h2 className="text-xl font-bold mb-4 text-base-blue">Editando a página inicial</h2>
       <div className="grid grid-cols-1 gap-y-10">
         <DashboardFormImage />
-        <DashboardForm formTitle="Texto ao lado do instagram" page={'home'} contentId={'text-aside-instagram'} />
-        <DashboardForm formTitle="Texto do banner principal" page={'home'} contentId={'main-banner-text'} />
-        <ColorPicker title="Cor do texto do banner" />
+        <DashboardForm formTitle="Texto ao lado do instagram" page="home" contentId="text-aside-instagram" />
+        <DashboardForm formTitle="Texto do banner principal" page="home" contentId="main-banner-text" />
+        <ColorPicker title="Cor do texto do banner" page="home" contentId="main-banner-text" />
       </div>
     </div>
   )

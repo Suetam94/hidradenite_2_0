@@ -18,7 +18,6 @@ export const metadata: Metadata = {
     type: 'website',
     url: 'https://hidradenitebrasil.org/'
   }
-
 }
 
 export default function RootLayout ({
@@ -31,7 +30,6 @@ export default function RootLayout ({
       <body className={inter.className}>
         <Header />
         {children}
-        <Footer />
       </body>
     </html>
   )

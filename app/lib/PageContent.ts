@@ -7,23 +7,6 @@ import { pageTextContent } from '@/app/lib/schemas'
 
 const prisma = new PrismaClient()
 
-export const pageContentManager = async (prevState: PageContent | IGeneralError, formData: FormData): Promise<PageContent | IGeneralError> => {
-  const validateAttributes = pageTextContent.safeParse({
-    page: formData.get('page'),
-    contentId: formData.get('contentId'),
-    textContent: formData.get('textContent')
-  })
-
-  if (!validateAttributes.success) {
-    return {
-      error: true,
-      message: JSON.stringify(validateAttributes.error.flatten().fieldErrors)
-    }
-  }
-
-  return await pageContent(validateAttributes.data, 'text')
-}
-
 export const pageContent = async (data: IPageContentText, contentType: ContentType): Promise<PageContent | IGeneralError> => {
   const validateAttributes = pageTextContent.safeParse(data)
 
@@ -34,7 +17,7 @@ export const pageContent = async (data: IPageContentText, contentType: ContentTy
     }
   }
 
-  const { page, textContent, contentId } = validateAttributes.data
+  const { page, textContent, contentId, color } = validateAttributes.data
 
   const pageId = await checkPage(page)
 
@@ -51,7 +34,8 @@ export const pageContent = async (data: IPageContentText, contentType: ContentTy
   if (hasContent !== null) {
     content = await prisma.pageContent.update({
       data: {
-        textContent
+        textContent: textContent !== null && textContent !== '' ? textContent : hasContent.textContent,
+        color: color !== null && color !== '' ? color: hasContent.color
       },
       where: {
         id: hasContent.id
@@ -62,7 +46,8 @@ export const pageContent = async (data: IPageContentText, contentType: ContentTy
       data: {
         pageId: Number(pageId),
         textContent,
-        contentId
+        contentId,
+        color
       }
     })
   }

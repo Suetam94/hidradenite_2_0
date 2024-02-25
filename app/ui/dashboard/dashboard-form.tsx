@@ -9,7 +9,8 @@ import Spinner from '@/app/ui/Spinner'
 const DashboardForm = ({
   page,
   contentId,
-  formTitle
+  formTitle,
+  defaultColor
 }: IDashboardForm): React.JSX.Element => {
   const [textValue, setTextValue] = useState('')
   const [isEditing, setIsEditing] = useState(false)
@@ -53,7 +54,8 @@ const DashboardForm = ({
         await pageContent({
           page,
           contentId,
-          textContent: textValue
+          textContent: textValue,
+          color: defaultColor
         }, 'text')
       }
     }
