@@ -45,7 +45,7 @@ export const pageContent = async (data: IPageContentText, contentType: ContentTy
     }
   }
 
-  const hasContent: PageContent | null = await getPageContentByPageId(pageId ?? 0)
+  const hasContent: PageContent | null = await getPageContentByPageId(pageId ?? 0, contentId)
 
   let content
   if (hasContent !== null) {
@@ -70,14 +70,15 @@ export const pageContent = async (data: IPageContentText, contentType: ContentTy
   return content
 }
 
-export const getPageContentByPageId = async (pageId: number): Promise<PageContent | null> => {
+export const getPageContentByPageId = async (pageId: number, contentId: string): Promise<PageContent | null> => {
   if (pageId === 0) {
     return null
   }
 
   const pageContent = await prisma.pageContent.findFirst({
     where: {
-      pageId
+      pageId,
+      contentId
     }
   })
 
@@ -88,13 +89,14 @@ export const getPageContentByPageId = async (pageId: number): Promise<PageConten
   return null
 }
 
-export const getPageContentByPageTitle = async (title: string): Promise<PageContent | null> => {
+export const getPageContentByPageTitle = async (title: string, contentId: string): Promise<PageContent | null> => {
   if (title.length === 0) {
     return null
   }
 
   const pageContent = await prisma.pageContent.findFirst({
     where: {
+      contentId,
       page: {
         title
       }

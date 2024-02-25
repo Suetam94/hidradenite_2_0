@@ -8,7 +8,8 @@ import Spinner from '@/app/ui/Spinner'
 
 const DashboardForm = ({
   page,
-  contentId
+  contentId,
+  formTitle
 }: IDashboardForm): React.JSX.Element => {
   const [textValue, setTextValue] = useState('')
   const [isEditing, setIsEditing] = useState(false)
@@ -18,7 +19,7 @@ const DashboardForm = ({
   useEffect(() => {
     void (async () => {
       setIsLoading(true)
-      const pageContent = await getPageContentByPageTitle(page)
+      const pageContent = await getPageContentByPageTitle(page, contentId)
       if (pageContent !== null) {
         const { textContent } = pageContent
         if (textContent !== null) {
@@ -39,6 +40,10 @@ const DashboardForm = ({
     setIsEditing(true)
   }
 
+  const handleCancelEdit = (): void => {
+    setIsEditing(false)
+  }
+
   const handleSave = async (answer: boolean): Promise<void> => {
     setIsModalOpen(false)
     setIsEditing(false)
@@ -57,7 +62,7 @@ const DashboardForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="w-full mx-auto">
-      <label className="block text-lg font-medium mb-2">Texto ao lado do instagram</label>
+      <label className="block text-lg font-medium mb-2">{formTitle}</label>
       <div className="border border-gray-300 h-32 rounded-md overflow-hidden flex justify-center items-center">
         {
           isLoading
@@ -75,7 +80,8 @@ const DashboardForm = ({
         }
       </div>
       <div className="mt-4 flex justify-end">
-        {!isEditing && (
+        {!isEditing
+          ? (
           <button
             type="button"
             className="bg-base-blue text-white px-4 py-2 mr-2 rounded hover:bg-[#3E9DD3] focus:outline-none"
@@ -83,7 +89,14 @@ const DashboardForm = ({
           >
             Editar
           </button>
-        )}
+            )
+          : (<button
+          type="button"
+          className="bg-gray-500 text-white px-4 py-2 mr-2 rounded hover:hover:bg-gray-400 focus:outline-none"
+          onClick={handleCancelEdit}
+        >
+          Cancelar
+        </button>)}
         <button type="submit" className="bg-[#FFA500] text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none">
           Salvar
         </button>

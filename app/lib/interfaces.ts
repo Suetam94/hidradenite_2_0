@@ -14,9 +14,14 @@ export interface IGeneralError {
 export interface IDashboardForm {
   page: string
   contentId: string
+  formTitle: string
 }
 
 export interface IConfirmationModal {
   isOpen: boolean
   onSave: (answer: boolean) => Promise<void>
+}
+
+export interface IColorPicker {
+  title: string
 }
