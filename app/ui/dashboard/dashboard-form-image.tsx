@@ -1,10 +1,40 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { Img } from 'react-image'
+import { type IDashboardImageForm, type IPageContentMediaClient } from '@/app/lib/interfaces'
+import {
+  getMediaBufferAndManage,
+  getPageContentByPageTitle,
+  getPageContentMediaByPageTitle
+} from '@/app/lib/PageContent'
+import FeedbackModal from '@/app/ui/feedback-modal'
+import Spinner from '@/app/ui/Spinner'
 
-const DashboardFormImage: React.FC = () => {
+const DashboardFormImage = ({ page, contentId, formTitle }: IDashboardImageForm): React.JSX.Element => {
   const [image, setImage] = useState<string | null>(null)
   const [file, setFile] = useState<File | null>(null)
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [modalTitle, setModalTitle] = useState<string>('')
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isUploading, setIsUploading] = useState<boolean>(false)
+
+  const getPageContentMedia = async () => {
+    try {
+      const mediaContent = await getPageContentMediaByPageTitle(page, contentId)
+      setImage(mediaContent)
+    } catch (e) {
+      console.log('Error: ' + e)
+    }
+  }
+
+  useEffect(() => {
+    (async () => {
+      setIsLoading(true)
+      await getPageContentMedia()
+      setIsLoading(false)
+    })()
+  }, [])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const selectedFile = e.target.files?.[0]
@@ -35,8 +65,33 @@ const DashboardFormImage: React.FC = () => {
     setFile(null)
   }
 
+  const handleSaveImage = async () => {
+    try {
+      if (file === null) {
+        throw new Error('Nenhum arquivo selecionado.')
+      }
+
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('page', page)
+      formData.append('contentId', contentId)
+
+      setIsUploading(true)
+      await getMediaBufferAndManage(formData)
+      setIsUploading(false)
+      setModalTitle('Imagem salva com sucesso!')
+      setIsOpen(true)
+    } catch (e) {
+      const error = e as Error
+      console.error('Erro ao salvar imagem:', error.message)
+      setModalTitle(`Erro! ${error.message}`)
+      setIsOpen(true)
+    }
+  }
+
   return (
     <div className="max-w-full w-full mx-auto">
+      <label className="block text-lg font-medium mb-2">{formTitle}</label>
       {(image == null) && (
         <div>
           <label htmlFor="image" className="block text-lg font-medium mb-2">
@@ -60,11 +115,14 @@ const DashboardFormImage: React.FC = () => {
       )}
       {(image != null) && (
         <div className="mt-4">
-          <img
+          <Img
             src={image}
             alt="Uploaded"
             className="w-full h-auto rounded-md"
-            style={{ maxWidth: '500px', maxHeight: '500px' }}
+            style={{
+              maxWidth: '500px',
+              maxHeight: '500px'
+            }}
           />
         </div>
       )}
@@ -75,14 +133,14 @@ const DashboardFormImage: React.FC = () => {
             onClick={handleDownload}
             className="bg-blue-500 text-white px-4 py-2 rounded mr-2 hover:bg-blue-600 focus:outline-none"
           >
-            Download Image
+            { isUploading ? <Spinner /> : 'Download Image' }
           </button>
           <button
             type="button"
             onClick={handleClearImage}
             className="bg-red-500 text-white px-4 py-2 rounded mr-2 hover:bg-red-600 focus:outline-none"
           >
-            Clear Image
+            {isUploading ? <Spinner /> : 'Clear Image'}
           </button>
         </div>
       )}
@@ -91,10 +149,12 @@ const DashboardFormImage: React.FC = () => {
           type="submit"
           disabled={file == null}
           className="bg-[#FFA500] text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none"
+          onClick={async () => { await handleSaveImage() }}
         >
-          Salvar
+          {isUploading || isLoading ? <Spinner/> : 'Salvar'}
         </button>
       </div>
+      <FeedbackModal isOpen={isOpen} onClose={setIsOpen} title={modalTitle} />
     </div>
   )
 }

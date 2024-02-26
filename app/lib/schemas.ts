@@ -10,7 +10,7 @@ export const pageTextContent = z.object({
 export const pageMediaContent = z.object({
   page: z.string(),
   contentId: z.string(),
-  mediaContent: z.any()
+  mediaContent: z.instanceof(Buffer)
 })
 
 export const pageTitle = z.object({

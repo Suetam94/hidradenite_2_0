@@ -5,6 +5,20 @@ export interface IPageContentText {
   color?: string
 }
 
+export interface IPageContentMedia {
+  page: string
+  contentId: string
+  mediaContent: Buffer
+}
+
+export interface IPageContentMediaClient {
+  page: string
+  contentId: string
+  mediaFile: File
+}
+
+export type PageContentType = IPageContentText | IPageContentMedia
+
 export type ContentType = 'text' | 'media'
 
 export interface IGeneralError {
@@ -17,6 +31,12 @@ export interface IDashboardForm {
   contentId: string
   formTitle: string
   defaultColor?: string
+}
+
+export interface IDashboardImageForm {
+  page: string
+  contentId: string
+  formTitle: string
 }
 
 export interface IConfirmationModal {
