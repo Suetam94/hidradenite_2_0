@@ -4,7 +4,7 @@ import { type PageContent, PrismaClient } from '@prisma/client'
 import {
   type ContentType,
   type IGeneralError,
-  type IPageContentMedia, type IPageContentMediaClient,
+  type IPageContentMedia,
   type IPageContentText,
   type PageContentType
 } from '@/app/lib/interfaces'
@@ -22,7 +22,7 @@ export const pageContent = async (data: PageContentType, contentType: ContentTyp
     default:
       return {
         error: true,
-        message: `Content type provided is invalid: ${contentType}`
+        message: `Content type provided is invalid: ${contentType as string}`
       }
   }
 }
@@ -90,7 +90,7 @@ export const managePageContentText = async (data: IPageContentText): Promise<Pag
   return content
 }
 
-export const managePageContentMedia = async (data: IPageContentMedia) => {
+export const managePageContentMedia = async (data: IPageContentMedia): Promise<PageContent | IGeneralError> => {
   const validateAttributes = pageMediaContent.safeParse(data)
 
   if (!validateAttributes.success) {
@@ -117,7 +117,7 @@ export const managePageContentMedia = async (data: IPageContentMedia) => {
   if (hasContent !== null) {
     content = await prisma.pageContent.update({
       data: {
-        mediaContent: mediaContent !== null ? mediaContent : hasContent.mediaContent
+        mediaContent: mediaContent ?? hasContent.mediaContent
       },
       where: {
         id: hasContent.id
@@ -191,8 +191,8 @@ export const getPageContentMediaByPageTitle = async (title: string, contentId: s
   })
 
   if (pageContent?.id !== null) {
-    if (pageContent) {
-      const {mediaContent} = pageContent
+    if (pageContent != null) {
+      const { mediaContent } = pageContent
       if (mediaContent !== null) {
         const buffer = Buffer.from(mediaContent).toString('base64')
         return `data:image/png;base64,${buffer}`

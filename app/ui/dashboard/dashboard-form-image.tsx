@@ -2,10 +2,9 @@
 
 import React, { useEffect, useState } from 'react'
 import { Img } from 'react-image'
-import { type IDashboardImageForm, type IPageContentMediaClient } from '@/app/lib/interfaces'
+import { type IDashboardImageForm } from '@/app/lib/interfaces'
 import {
   getMediaBufferAndManage,
-  getPageContentByPageTitle,
   getPageContentMediaByPageTitle
 } from '@/app/lib/PageContent'
 import FeedbackModal from '@/app/ui/feedback-modal'
@@ -19,17 +18,18 @@ const DashboardFormImage = ({ page, contentId, formTitle }: IDashboardImageForm)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isUploading, setIsUploading] = useState<boolean>(false)
 
-  const getPageContentMedia = async () => {
+  const getPageContentMedia = async (): Promise<void> => {
     try {
       const mediaContent = await getPageContentMediaByPageTitle(page, contentId)
       setImage(mediaContent)
     } catch (e) {
-      console.log('Error: ' + e)
+      const error = e as Error
+      console.error(`Error: ${error.message}`)
     }
   }
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       setIsLoading(true)
       await getPageContentMedia()
       setIsLoading(false)
@@ -65,7 +65,7 @@ const DashboardFormImage = ({ page, contentId, formTitle }: IDashboardImageForm)
     setFile(null)
   }
 
-  const handleSaveImage = async () => {
+  const handleSaveImage = async (): Promise<void> => {
     try {
       if (file === null) {
         throw new Error('Nenhum arquivo selecionado.')
@@ -149,7 +149,7 @@ const DashboardFormImage = ({ page, contentId, formTitle }: IDashboardImageForm)
           type="submit"
           disabled={file == null}
           className="bg-[#FFA500] text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none"
-          onClick={async () => { await handleSaveImage() }}
+          onClick={() => handleSaveImage}
         >
           {isUploading || isLoading ? <Spinner/> : 'Salvar'}
         </button>
