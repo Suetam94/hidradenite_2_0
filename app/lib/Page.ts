@@ -1,8 +1,6 @@
 'use server'
 
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import prisma from '@/app/lib/prisma.context'
 
 export const checkPage = async (title: string): Promise<number | undefined> => {
   const page = await prisma.page.findFirst({

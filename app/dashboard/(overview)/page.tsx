@@ -1,7 +1,11 @@
+'use client'
+
 import React from 'react'
 import DashboardCard from '@/app/ui/dashboard/dashboard-card'
+import nookies from 'nookies'
 
-export default async function Page (): Promise<React.JSX.Element> {
+const Page = (): React.JSX.Element => {
+  console.log(nookies.get(null, 'user'))
   return (
     <main>
       <h1 className="mb-4 text-xl md:text-2xl">Dashboard</h1>
@@ -16,3 +20,5 @@ export default async function Page (): Promise<React.JSX.Element> {
     </main>
   )
 }
+
+export default Page

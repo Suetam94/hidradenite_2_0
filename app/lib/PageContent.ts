@@ -1,9 +1,9 @@
 'use server'
 
-import { type PageContent, PrismaClient } from '@prisma/client'
+import { type PageContent } from '@prisma/client'
 import {
   type ContentType,
-  type IGeneralError,
+  type IGeneralValidated,
   type IPageContentMedia,
   type IPageContentText,
   type PageContentType
@@ -11,9 +11,9 @@ import {
 import { checkPage } from '@/app/lib/Page'
 import { pageTextContent, pageMediaContent } from '@/app/lib/schemas'
 
-const prisma = new PrismaClient()
+import prisma from '@/app/lib/prisma.context'
 
-export const pageContent = async (data: PageContentType, contentType: ContentType): Promise<PageContent | IGeneralError> => {
+export const pageContent = async (data: PageContentType, contentType: ContentType): Promise<PageContent | IGeneralValidated> => {
   switch (contentType) {
     case 'text':
       return await managePageContentText(data as IPageContentText)
@@ -27,7 +27,7 @@ export const pageContent = async (data: PageContentType, contentType: ContentTyp
   }
 }
 
-export const getMediaBufferAndManage = async (formData: FormData): Promise<PageContent | IGeneralError> => {
+export const getMediaBufferAndManage = async (formData: FormData): Promise<PageContent | IGeneralValidated> => {
   const file = formData.get('file') as File
   const page = formData.get('page') as string
   const contentId = formData.get('contentId') as string
@@ -42,7 +42,7 @@ export const getMediaBufferAndManage = async (formData: FormData): Promise<PageC
   return content
 }
 
-export const managePageContentText = async (data: IPageContentText): Promise<PageContent | IGeneralError> => {
+export const managePageContentText = async (data: IPageContentText): Promise<PageContent | IGeneralValidated> => {
   const validateAttributes = pageTextContent.safeParse(data)
 
   if (!validateAttributes.success) {
@@ -90,7 +90,7 @@ export const managePageContentText = async (data: IPageContentText): Promise<Pag
   return content
 }
 
-export const managePageContentMedia = async (data: IPageContentMedia): Promise<PageContent | IGeneralError> => {
+export const managePageContentMedia = async (data: IPageContentMedia): Promise<PageContent | IGeneralValidated> => {
   const validateAttributes = pageMediaContent.safeParse(data)
 
   if (!validateAttributes.success) {

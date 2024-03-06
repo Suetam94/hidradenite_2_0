@@ -32,3 +32,24 @@ model PageContent {
   page         Page     @relation(fields: [pageId], references: [id])
   pageId       Int
 }
+
+model SupportGroup {
+  id           Int     @id @default(autoincrement())
+  eventDate    String
+  eventTime    String
+  location     String
+  image        Bytes
+  isEventValid Boolean @default(true)
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  name      String
+  isAdmin   Boolean  @default(false)
+  phone     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
