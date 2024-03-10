@@ -25,6 +25,7 @@ export interface IGeneralValidated {
   error: boolean
   message?: string | string[]
   user?: ICreateUser
+  supportGroup?: ISupportGroupEvent
 }
 
 export interface IDashboardForm {
@@ -63,7 +64,19 @@ export interface ISupportGroupEvent {
   eventDate: string
   location: string
   eventTime: string
+  imageFile?: File
+  imageBuffer?: Buffer
+  imageString?: string
+  isSvg?: boolean
+}
+
+export interface INormalizedSupportGroupEvent {
+  id: number
+  eventDate: string
+  location: string
+  eventTime: string
   image: string
+  isSvg?: boolean
 }
 
 export interface ISupportGroupEvents {
