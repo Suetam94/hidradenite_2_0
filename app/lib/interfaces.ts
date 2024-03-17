@@ -26,6 +26,7 @@ export interface IGeneralValidated {
   message?: string | string[]
   user?: ICreateUser
   supportGroup?: ISupportGroupEvent
+  updatedSupportGroup?: Partial<ISupportGroupEvent>
 }
 
 export interface IDashboardForm {
@@ -61,6 +62,7 @@ export interface IColorPicker {
 }
 
 export interface ISupportGroupEvent {
+  id?: number
   eventDate: string
   location: string
   eventTime: string
@@ -68,6 +70,7 @@ export interface ISupportGroupEvent {
   imageBuffer?: Buffer
   imageString?: string
   isSvg?: boolean
+  isUpdating?: boolean
 }
 
 export interface INormalizedSupportGroupEvent {

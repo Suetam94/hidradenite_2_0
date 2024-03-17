@@ -25,7 +25,7 @@ export const supportGroupEventSchema = z.object({
 })
 
 export const updateSupportGroupEventSchema = z.object({
-  id: z.number(),
+  id: z.number().min(1),
   eventTime: z.string().optional(),
   eventDate: z.string().optional(),
   location: z.string().optional(),

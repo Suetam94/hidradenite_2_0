@@ -12,7 +12,7 @@ const ShowSupportGroup = ({ supportGroups }: IShowSupportGroup): React.JSX.Eleme
       {supportGroups.map(({ id, eventDate, location, eventTime, image, isSvg }) => {
         return (
           <div key={`${id}_support_group`} className="p-4">
-            <SupportGroupCard eventDate={eventDate} location={location} eventTime={eventTime} imageString={image} isSvg={isSvg} />
+            <SupportGroupCard id={id} eventDate={eventDate} location={location} eventTime={eventTime} imageString={image} isSvg={isSvg} isUpdating={true} />
           </div>
         )
       })}

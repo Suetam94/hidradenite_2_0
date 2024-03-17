@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { createSupportGroupEvent, validateSupportGroupEvent } from '@/app/lib/SupportGroup'
+import { createSupportGroupEvent, validateCreateSupportGroupEvent } from '@/app/lib/SupportGroup'
 import Spinner from '@/app/ui/Spinner'
 import FeedbackModal from '@/app/ui/feedback-modal'
 import { type IGeneralValidated } from '@/app/lib/interfaces'
@@ -32,7 +32,7 @@ const CreateSupportGroup = (): React.JSX.Element => {
       form.append('eventTime', formData.eventTime)
       form.append('image', formData.image)
 
-      const { error, message } = await validateSupportGroupEvent(form)
+      const { error, message } = await validateCreateSupportGroupEvent(form)
 
       if (error) {
         throw new Error(JSON.stringify(message))

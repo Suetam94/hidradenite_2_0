@@ -1,16 +1,12 @@
 'use server'
 
 import { type SupportGroup } from '@prisma/client'
-import {
-  type IGeneralValidated,
-  INormalizedSupportGroupEvent,
-  type IUpdateSupportGroupEvent
-} from '@/app/lib/interfaces'
+import { type IGeneralValidated, type INormalizedSupportGroupEvent } from '@/app/lib/interfaces'
 import { supportGroupEventSchema, updateSupportGroupEventSchema } from '@/app/lib/schemas'
 
 import prisma from '@/app/lib/prisma.context'
 
-export const validateSupportGroupEvent = async (formData: FormData): Promise<IGeneralValidated> => {
+export const validateCreateSupportGroupEvent = async (formData: FormData): Promise<IGeneralValidated> => {
   const eventDate = formData.get('eventDate') as string
   const location = formData.get('location') as string
   const eventTime = formData.get('eventTime') as string
@@ -96,7 +92,42 @@ export const listSupportGroupEvent = async (): Promise<INormalizedSupportGroupEv
   return normalizedSupportGroups
 }
 
-const updateSupportGroupEvent = async (data: IUpdateSupportGroupEvent): Promise<SupportGroup | IGeneralValidated> => {
+export const validateUpdateSupportGroupEvent = async (formData: FormData): Promise<IGeneralValidated> => {
+  const id = formData.get('id') as string
+  let eventDate = formData.get('eventDate') as string | undefined
+  let location = formData.get('location') as string | undefined
+  let eventTime = formData.get('eventTime') as string | undefined
+  let image
+
+  if (formData.get('image') !== '') {
+    image = formData.get('image') as File | undefined
+  }
+  if (formData.get('eventDate') !== '') {
+    eventDate = formData.get('eventDate') as string | undefined
+  }
+  if (formData.get('location') !== '') {
+    location = formData.get('location') as string | undefined
+  }
+  if (formData.get('eventTime') !== '') {
+    eventTime = formData.get('eventTime') as string | undefined
+  }
+
+  let mediaArrayBuffer: ArrayBuffer
+  let mediaContent: Buffer | undefined
+
+  if (image !== undefined) {
+    mediaArrayBuffer = await image.arrayBuffer()
+    mediaContent = Buffer.from(mediaArrayBuffer)
+  }
+
+  const data: Partial<SupportGroup> = {
+    id: Number(id),
+    eventDate,
+    location,
+    eventTime,
+    image: mediaContent
+  }
+
   const validatedData = updateSupportGroupEventSchema.safeParse(data)
 
   if (!validatedData.success) {
@@ -106,13 +137,47 @@ const updateSupportGroupEvent = async (data: IUpdateSupportGroupEvent): Promise<
     }
   }
 
-  const parsedData = validatedData.data
+  return {
+    error: false,
+    updatedSupportGroup: validatedData.data
+  }
+}
+
+export const updateSupportGroupEvent = async (formData: FormData): Promise<SupportGroup | IGeneralValidated> => {
+  const id = formData.get('id') as unknown as number
+  const eventDate = formData.get('eventDate') as string
+  const location = formData.get('location') as string
+  const eventTime = formData.get('eventTime') as string
+  let image
+
+  if (formData.get('image') !== '') {
+    image = formData.get('image') as File | undefined
+  }
+
+  const data: Partial<SupportGroup> = {}
+
+  if (image !== undefined) {
+    const mediaArrayBuffer = await image.arrayBuffer()
+    data.image = Buffer.from(mediaArrayBuffer)
+  }
+
+  if (eventDate.trim() !== '') {
+    data.eventDate = eventDate
+  }
+
+  if (location.trim() !== '') {
+    data.location = location
+  }
+
+  if (eventTime.trim() !== '') {
+    data.eventTime = eventTime
+  }
 
   const supportGroupEvent = await prisma.supportGroup.update({
     where: {
-      id: parsedData.id
+      id: Number(id)
     },
-    data: parsedData
+    data
   })
 
   if (supportGroupEvent === undefined || supportGroupEvent === null) {
