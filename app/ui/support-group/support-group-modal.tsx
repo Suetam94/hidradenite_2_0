@@ -48,9 +48,8 @@ const SupportGroupModal = ({ supportGroup, modalResponse, isUpdating, closeModal
         throw new Error(JSON.stringify(message))
       }
 
-      const updatedSupportGroupEvent = await updateSupportGroupEvent(form)
+      await updateSupportGroupEvent(form)
 
-      console.log(updatedSupportGroupEvent)
       modalResponse(true)
       setIsLoading(false)
     } catch (e) {

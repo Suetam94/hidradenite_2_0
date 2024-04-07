@@ -3,6 +3,9 @@
 import React, { useState } from 'react'
 import { type ISupportGroupEvent } from '@/app/lib/interfaces'
 import SupportGroupModal from '@/app/ui/support-group/support-group-modal'
+import DeleteModal from '@/app/ui/delete-modal'
+import { deleteSupportGroupEvent } from '@/app/lib/SupportGroup'
+import FeedbackModal from '@/app/ui/feedback-modal'
 
 const SupportGroupCard = ({
   id,
@@ -14,14 +17,27 @@ const SupportGroupCard = ({
   isUpdating = false
 }: ISupportGroupEvent): React.JSX.Element => {
   const [modalResponse, setModalResponse] = useState<boolean>()
+  const [deleteModal, setDeleteModal] = useState<boolean>(false)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
 
-  let dataUrl = null
+  let dataUrl
 
   if (isSvg === true) {
     dataUrl = `data:image/svg+xml;base64, ${imageString}`
   } else {
     dataUrl = `data:image/png;base64, ${imageString}`
+  }
+
+  const handleDeleteSupportGroup = (id: number): boolean => {
+    try {
+      void (async () => {
+        await deleteSupportGroupEvent(id)
+      })()
+      return true
+    } catch (e) {
+      console.log(e)
+      return false
+    }
   }
 
   return (
@@ -38,10 +54,20 @@ const SupportGroupCard = ({
       </div>
       {isUpdating && (
         <div className="flex justify-around items-center mt-4">
-          <button onClick={() => { setIsModalOpen(true) }} className="bg-cyan-400 flex justify-center hover:bg-blue-800 text-white font-bold py-2 px-4 rounded">
+          <button
+            onClick={() => {
+              setIsModalOpen(true)
+            }}
+            className="bg-cyan-400 flex justify-center hover:bg-blue-800 text-white font-bold py-2 px-4 rounded"
+          >
             Editar
           </button>
-          <button className="bg-red-500 flex justify-center hover:bg-red-800 text-white font-bold py-2 px-4 rounded">
+          <button
+            onClick={() => {
+              setDeleteModal(true)
+            }}
+            className="bg-red-500 flex justify-center hover:bg-red-800 text-white font-bold py-2 px-4 rounded"
+          >
             Excluir
           </button>
         </div>
@@ -54,6 +80,29 @@ const SupportGroupCard = ({
           isUpdating={isUpdating}
         />
       )}
+      {id !== undefined && (
+        <DeleteModal
+          isOpen={deleteModal}
+          closeModal={setDeleteModal}
+          deleteAction={handleDeleteSupportGroup}
+          param={id}
+        />
+      )}
+      {modalResponse === false && modalResponse !== undefined
+        ? (
+        <FeedbackModal
+          isOpen={!modalResponse}
+          onClose={setModalResponse}
+          title={'Algo deu errado, por favor, tente novamente.'}
+        />
+          )
+        : (
+        <FeedbackModal
+          isOpen={modalResponse as boolean}
+          onClose={setModalResponse}
+          title={'Registro atualizado com sucesso'}
+        />
+          )}
     </div>
   )
 }

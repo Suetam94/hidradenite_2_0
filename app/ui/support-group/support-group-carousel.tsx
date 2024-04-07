@@ -4,9 +4,13 @@ import React from 'react'
 import { Carousel } from 'react-responsive-carousel'
 import 'react-responsive-carousel/lib/styles/carousel.min.css'
 import GroupSupportCard from './support-group-card'
-import { type ISupportGroupEvents } from '@/app/lib/interfaces'
+import { type INormalizedSupportGroupEvent } from '@/app/lib/interfaces'
 
-const GroupSupportCarousel = ({ events }: ISupportGroupEvents): React.JSX.Element => {
+interface IShowSupportGroup {
+  supportGroups: INormalizedSupportGroupEvent[]
+}
+
+const GroupSupportCarousel = ({ supportGroups }: IShowSupportGroup): React.JSX.Element => {
   return (
     <Carousel
       showArrows={true}
@@ -38,9 +42,9 @@ const GroupSupportCarousel = ({ events }: ISupportGroupEvents): React.JSX.Elemen
         )
       }}
     >
-      {events.map((event, index) => (
+      {supportGroups.map((event, index) => (
         <div key={index}>
-          <GroupSupportCard image={event.image} eventTime={event.eventTime} eventDate={event.eventDate} location={event.location} />
+          <GroupSupportCard imageString={event.image} eventTime={event.eventTime} eventDate={event.eventDate} location={event.location} isSvg={event.isSvg} />
         </div>
       ))}
     </Carousel>

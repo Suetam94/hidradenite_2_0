@@ -190,7 +190,7 @@ export const updateSupportGroupEvent = async (formData: FormData): Promise<Suppo
   return supportGroupEvent
 }
 
-const deleteSupportGroupEvent = async (id: number): Promise<boolean> => {
+export const deleteSupportGroupEvent = async (id: number): Promise<boolean> => {
   const existSupportGroup = await prisma.supportGroup.findFirst({
     where: {
       id

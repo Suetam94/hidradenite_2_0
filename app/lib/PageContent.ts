@@ -37,8 +37,6 @@ export const getMediaBufferAndManage = async (formData: FormData): Promise<PageC
 
   const content = await pageContent({ page, contentId, mediaContent }, 'media')
 
-  console.log(content)
-
   return content
 }
 
