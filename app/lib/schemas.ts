@@ -54,3 +54,16 @@ export const logUserSchema = z.object({
   username: z.string().min(3).max(20),
   password: z.string().min(6).max(100)
 })
+
+export const createArticleSchema = z.object({
+  title: z.string().min(3),
+  link: z.string().url(),
+  resume: z.string().min(10)
+})
+
+export const updateArticleSchema = z.object({
+  id: z.number(),
+  title: z.string().min(3).optional(),
+  link: z.string().url().optional(),
+  resume: z.string().min(10).optional()
+})

@@ -27,6 +27,14 @@ export interface IGeneralValidated {
   user?: ICreateUser
   supportGroup?: ISupportGroupEvent
   updatedSupportGroup?: Partial<ISupportGroupEvent>
+  article?: IArticle
+}
+
+export interface IArticle {
+  id?: number
+  title: string
+  link: string
+  resume: string
 }
 
 export interface IDashboardForm {
