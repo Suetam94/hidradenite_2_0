@@ -60,3 +60,9 @@ model Article {
   link   String
   resume String
 }
+
+model CommomQuestion {
+  id       Int    @id @default(autoincrement())
+  question String
+  answer   String
+}

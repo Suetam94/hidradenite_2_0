@@ -70,9 +70,6 @@ const Footer = (): React.JSX.Element => {
               <Link href="#">atualizações</Link>
             </li>
             <li className="hover:font-bold duration-300">
-              <Link href="#">galeria</Link>
-            </li>
-            <li className="hover:font-bold duration-300">
               <Link href="#">informações científicas</Link>
             </li>
             <li className="hover:font-bold duration-300">

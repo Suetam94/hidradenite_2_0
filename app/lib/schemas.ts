@@ -67,3 +67,14 @@ export const updateArticleSchema = z.object({
   link: z.string().url().optional(),
   resume: z.string().min(10).optional()
 })
+
+export const createCommonQuestionSchema = z.object({
+  question: z.string().min(3),
+  answer: z.string().url()
+})
+
+export const updateCommonQuestionSchema = z.object({
+  id: z.number(),
+  question: z.string().min(3).optional(),
+  answer: z.string().url().optional()
+})

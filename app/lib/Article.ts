@@ -104,6 +104,16 @@ export const updateArticle = async (formData: FormData): Promise<Article | IGene
   return article
 }
 
+export const listArticles = async (): Promise<Article[]> => {
+  const articles = await prisma.article.findMany()
+
+  if (articles === undefined) {
+    return []
+  }
+
+  return articles
+}
+
 export const deleteArticle = async (id: number): Promise<boolean> => {
   const existArticle = await prisma.article.findFirst({
     where: {

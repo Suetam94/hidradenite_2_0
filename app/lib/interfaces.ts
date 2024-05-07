@@ -1,3 +1,5 @@
+import { CommomQuestion } from '@prisma/client'
+
 export interface IPageContentText {
   page: string
   contentId: string
@@ -28,6 +30,13 @@ export interface IGeneralValidated {
   supportGroup?: ISupportGroupEvent
   updatedSupportGroup?: Partial<ISupportGroupEvent>
   article?: IArticle
+  commonQuestion?: Partial<ICommonQuestion>
+}
+
+export interface ICommonQuestion {
+  id?: number
+  question: string
+  answer: string
 }
 
 export interface IArticle {
