@@ -70,11 +70,24 @@ export const updateArticleSchema = z.object({
 
 export const createCommonQuestionSchema = z.object({
   question: z.string().min(3),
-  answer: z.string().url()
+  answer: z.string()
 })
 
 export const updateCommonQuestionSchema = z.object({
   id: z.number(),
   question: z.string().min(3).optional(),
-  answer: z.string().url().optional()
+  answer: z.string().optional()
+})
+
+export const createAboutUsSchema = z.object({
+  title: z.string().min(3),
+  content: z.string(),
+  media: z.instanceof(Buffer).optional()
+})
+
+export const updateAboutUsSchema = z.object({
+  id: z.number().min(1),
+  title: z.string().min(3).optional(),
+  content: z.string().optional(),
+  media: z.instanceof(Buffer).optional()
 })

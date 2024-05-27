@@ -1,4 +1,4 @@
-import { CommomQuestion } from '@prisma/client'
+import { AboutUs, CommomQuestion } from '@prisma/client'
 
 export interface IPageContentText {
   page: string
@@ -31,6 +31,7 @@ export interface IGeneralValidated {
   updatedSupportGroup?: Partial<ISupportGroupEvent>
   article?: IArticle
   commonQuestion?: Partial<ICommonQuestion>
+  aboutUs?: Partial<AboutUs>
 }
 
 export interface ICommonQuestion {
@@ -137,4 +138,23 @@ export interface IGetUserParam {
   id?: number
   username?: string
   email?: string
+}
+
+export interface INormalizedAboutUs {
+  id: number
+  title: string
+  content: string
+  media?: string
+  isSvg?: boolean
+}
+
+export interface IAboutUs {
+  id?: number
+  title?: string
+  content?: string
+  imageFile?: File
+  imageBuffer?: Buffer
+  imageString?: string
+  isSvg?: boolean
+  isUpdating?: boolean
 }
