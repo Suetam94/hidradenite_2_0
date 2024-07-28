@@ -1,10 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
-import { createSupportGroupEvent, validateCreateSupportGroupEvent } from '@/app/lib/SupportGroup'
+import { createSupportGroup } from '@/app/lib/SupportGroup'
 import Spinner from '@/app/ui/Spinner'
 import FeedbackModal from '@/app/ui/feedback-modal'
-import { type IGeneralValidated } from '@/app/lib/interfaces'
 
 const CreateSupportGroup = (): React.JSX.Element => {
   const [modalOpen, setModalOpen] = useState(false)
@@ -32,22 +31,15 @@ const CreateSupportGroup = (): React.JSX.Element => {
       form.append('eventTime', formData.eventTime)
       form.append('image', formData.image)
 
-      const { error, message } = await validateCreateSupportGroupEvent(form)
+      const { error, message } = await createSupportGroup(form)
 
       if (error) {
-        throw new Error(JSON.stringify(message))
-      }
-
-      const newSupportGroup = await createSupportGroupEvent(form)
-      const { error: createSupportGroupError, message: createSupportGroupMessage } = newSupportGroup as IGeneralValidated
-
-      if (createSupportGroupError) {
-        throw new Error(JSON.stringify(createSupportGroupMessage))
+        throw new Error(message)
       }
 
       setIsLoading(false)
 
-      setModalTitle('Novo evento de grupo de apoio criado com sucesso!')
+      setModalTitle(message)
       setIsModalOpen(true)
     } catch (e) {
       const err = e as Error

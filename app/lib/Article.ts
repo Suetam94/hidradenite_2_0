@@ -1,135 +1,128 @@
 'use server'
 
-import prisma from '@/app/lib/prisma.context'
-import { createArticleSchema, updateArticleSchema } from '@/app/lib/schemas'
-import { type IArticle, type IGeneralValidated } from '@/app/lib/interfaces'
-import { type Article } from '@prisma/client'
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  type QuerySnapshot,
+  updateDoc
+} from 'firebase/firestore'
+import { db } from '@/config/firebase'
+import { createArticleSchema, updateArticleSchema } from '@/app/lib/validation/article'
+import type { ZodSchema } from 'zod'
 
-export const validateCreateArticle = (formData: FormData): IGeneralValidated => {
-  const title = formData.get('articleTitle') as string
-  const link = formData.get('articleLink') as string
-  const resume = formData.get('articleResume') as string
-
-  const validatedData = createArticleSchema.safeParse({ title, link, resume })
-
-  if (!validatedData.success) {
-    return {
-      error: true,
-      message: JSON.stringify(validatedData.error.flatten().fieldErrors)
-    }
-  }
-
-  return {
-    error: false,
-    article: validatedData.data
-  }
+export interface ICreateArticleData {
+  title: string
+  link: string
+  resume: string
 }
 
-export const createArticle = async (formData: FormData): Promise<Article | IGeneralValidated> => {
-  const title = formData.get('articleTitle') as string
-  const link = formData.get('articleLink') as string
-  const resume = formData.get('articleResume') as string
-
-  const article = await prisma.article.create({
-    data: {
-      title, link, resume
-    }
-  })
-
-  if (article === undefined || article === null) {
-    return {
-      error: true,
-      message: 'It was not possible to create a new support group event.'
-    }
-  }
-
-  return article
+export interface IArticleData extends ICreateArticleData {
+  id: string
 }
 
-export const validateUpdateArticle = (formData: FormData): IGeneralValidated => {
-  const id = formData.get('id') as string
-  const title = formData.get('articleTitle') as string
-  const link = formData.get('articleLink') as string
-  const resume = formData.get('articleResume') as string
-
-  const validatedData = updateArticleSchema.safeParse({ id, title, link, resume })
-
-  if (!validatedData.success) {
-    return {
-      error: true,
-      message: JSON.stringify(validatedData.error.flatten().fieldErrors)
-    }
-  }
-
-  return {
-    error: false,
-    article: validatedData.data as IArticle
-  }
+interface IReturn {
+  error: boolean
+  message: string
 }
 
-export const updateArticle = async (formData: FormData): Promise<Article | IGeneralValidated> => {
-  const id = formData.get('id') as unknown as number
+async function validateSchema<Data> (schema: ZodSchema<Data>, data: any): Promise<IReturn | null> {
+  const validation = schema.safeParse(data)
+  if (!validation.success) {
+    return {
+      error: true,
+      message: validation.error.message
+    }
+  }
+  return null
+}
+
+export async function createArticle (formData: FormData): Promise<IReturn> {
   const title = formData.get('title') as string
   const link = formData.get('link') as string
   const resume = formData.get('resume') as string
 
-  const data: Partial<Article> = {}
+  const validationResult = await validateSchema(createArticleSchema, { title, link, resume })
+  if (validationResult != null) return validationResult
 
-  if (title.trim() !== '') {
-    data.title = title
-  }
+  try {
+    await addDoc(collection(db, 'article'), {
+      title,
+      link,
+      resume
+    } satisfies ICreateArticleData)
 
-  if (link.trim() !== '') {
-    data.link = link
-  }
-
-  if (resume.trim() !== '') {
-    data.resume = resume
-  }
-
-  const article = await prisma.article.update({
-    where: {
-      id: Number(id)
-    },
-    data
-  })
-
-  if (article === undefined || article === null) {
+    return {
+      error: false,
+      message: 'Novo conteúdo da página criado com sucesso!'
+    }
+  } catch (error) {
+    console.error('Error creating document: ', error)
     return {
       error: true,
-      message: 'It was not possible to update an article.'
+      message: (error as Error).message
     }
   }
-
-  return article
 }
 
-export const listArticles = async (): Promise<Article[]> => {
-  const articles = await prisma.article.findMany()
-
-  if (articles === undefined) {
+export async function readArticles (): Promise<IArticleData[]> {
+  try {
+    const querySnapshot: QuerySnapshot = await getDocs(collection(db, 'article'))
+    return querySnapshot.docs.map((doc: { id: string, data: () => any }) => ({
+      id: doc.id,
+      ...doc.data()
+    })) as IArticleData[]
+  } catch (error) {
+    console.error('Error reading documents: ', error)
     return []
   }
-
-  return articles
 }
 
-export const deleteArticle = async (id: number): Promise<boolean> => {
-  const existArticle = await prisma.article.findFirst({
-    where: {
-      id
-    }
-  })
+export async function updateArticle (formData: FormData): Promise<IReturn> {
+  const id = formData.get('id') as string
+  const title = formData.get('title') as string
+  const link = formData.get('link') as string
+  const resume = formData.get('resume') as string
 
-  if (existArticle === undefined || existArticle === null) {
-    return true
+  const validationResult = await validateSchema(updateArticleSchema, { title, link, resume })
+  if (validationResult != null) return validationResult
+
+  try {
+    const docRef = doc(db, 'article', id)
+    await updateDoc(docRef, {
+      title,
+      link,
+      resume
+    })
+
+    return {
+      error: false,
+      message: 'Conteúdo da página atualizado com sucesso!'
+    }
+  } catch (error) {
+    console.error('Error updating document: ', error)
+    return {
+      error: true,
+      message: (error as Error).message
+    }
   }
+}
 
-  await prisma.article.delete({
-    where: {
-      id
+export async function deleteArticle (id: string): Promise<IReturn> {
+  try {
+    await deleteDoc(doc(db, 'article', id))
+
+    return {
+      error: false,
+      message: 'Conteúdo da página deletado com sucesso!'
     }
-  })
-
-  return true
+  } catch (error) {
+    console.error('Error deleting document: ', error)
+    return {
+      error: true,
+      message: (error as Error).message
+    }
+  }
 }

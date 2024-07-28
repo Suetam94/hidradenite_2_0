@@ -1,126 +1,126 @@
 'use server'
 
-import prisma from '@/app/lib/prisma.context'
-import type { CommomQuestion } from '@prisma/client'
-import type { IGeneralValidated } from '@/app/lib/interfaces'
-import { createCommonQuestionSchema, updateCommonQuestionSchema } from '@/app/lib/schemas'
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  type QuerySnapshot,
+  updateDoc
+} from 'firebase/firestore'
+import { db } from '@/config/firebase'
+import {
+  createCommonQuestionSchema,
+  updateCommonQuestionSchema
+} from '@/app/lib/validation/common-question'
+import { type ZodSchema } from 'zod'
 
-export const validateCreateCommonQuestion = (formData: FormData): IGeneralValidated => {
+export interface ICreateCommonQuestionData {
+  question: string
+  answer: string
+}
+
+export interface ICommonQuestionData extends ICreateCommonQuestionData {
+  id: string
+}
+
+interface IReturn {
+  error: boolean
+  message: string
+}
+
+async function validateSchema<Data> (schema: ZodSchema<Data>, data: any): Promise<IReturn | null> {
+  const validation = schema.safeParse(data)
+  if (!validation.success) {
+    return {
+      error: true,
+      message: validation.error.message
+    }
+  }
+  return null
+}
+
+export async function createCommonQuestion (formData: FormData): Promise<IReturn> {
   const question = formData.get('question') as string
   const answer = formData.get('answer') as string
 
-  const validatedData = createCommonQuestionSchema.safeParse({ question, answer })
+  const validationResult = await validateSchema(createCommonQuestionSchema, { question, answer })
+  if (validationResult != null) return validationResult
 
-  if (!validatedData.success) {
+  try {
+    await addDoc(collection(db, 'commonQuestion'), {
+      question,
+      answer
+    } satisfies ICreateCommonQuestionData)
+
+    return {
+      error: false,
+      message: 'Novo conteúdo da página criado com sucesso!'
+    }
+  } catch (error) {
+    console.error('Error creating document: ', error)
     return {
       error: true,
-      message: JSON.stringify(validatedData.error.flatten().fieldErrors)
+      message: (error as Error).message
     }
-  }
-
-  return {
-    error: false,
-    commonQuestion: validatedData.data
   }
 }
 
-export const createCommonQuestion = async (formData: FormData): Promise<CommomQuestion | IGeneralValidated> => {
-  const question = formData.get('question') as string
-  const answer = formData.get('answer') as string
-
-  const commonQuestion = await prisma.commomQuestion.create({
-    data: {
-      question, answer
-    }
-  })
-
-  if (commonQuestion === undefined || commonQuestion === null) {
-    return {
-      error: true,
-      message: 'It was not possible to create a new common question event.'
-    }
-  }
-
-  return commonQuestion
-}
-
-export const listCommonQuestion = async (): Promise<CommomQuestion[]> => {
-  const commonQuestions = await prisma.commomQuestion.findMany()
-
-  if (commonQuestions === undefined) {
+export async function readCommonQuestions (): Promise<ICommonQuestionData[]> {
+  try {
+    const querySnapshot: QuerySnapshot = await getDocs(collection(db, 'commonQuestion'))
+    return querySnapshot.docs.map((doc: { id: string, data: () => any }) => ({
+      id: doc.id,
+      ...doc.data()
+    })) as ICommonQuestionData[]
+  } catch (error) {
+    console.error('Error reading documents: ', error)
     return []
   }
-
-  return commonQuestions
 }
 
-export const validateUpdateCommonQuestion = (formData: FormData): IGeneralValidated => {
+export async function updateCommonQuestion (formData: FormData): Promise<IReturn> {
+  const id = formData.get('id') as string
   const question = formData.get('question') as string
   const answer = formData.get('answer') as string
 
-  const validatedData = updateCommonQuestionSchema.safeParse({ question, answer })
+  const validationResult = await validateSchema(updateCommonQuestionSchema, { question, answer })
+  if (validationResult != null) return validationResult
 
-  if (!validatedData.success) {
+  try {
+    const docRef = doc(db, 'commonQuestion', id)
+    await updateDoc(docRef, {
+      question,
+      answer
+    })
+
+    return {
+      error: false,
+      message: 'Conteúdo da página atualizado com sucesso!'
+    }
+  } catch (error) {
+    console.error('Error updating document: ', error)
     return {
       error: true,
-      message: JSON.stringify(validatedData.error.flatten().fieldErrors)
+      message: (error as Error).message
     }
-  }
-
-  return {
-    error: false,
-    commonQuestion: validatedData.data
   }
 }
 
-export const updateCommonQuestion = async (formData: FormData): Promise<CommomQuestion | IGeneralValidated> => {
-  const id = formData.get('question') as unknown as number
-  const question = formData.get('question') as string
-  const answer = formData.get('answer') as string
+export async function deleteCommonQuestion (id: string): Promise<IReturn> {
+  try {
+    await deleteDoc(doc(db, 'commonQuestion', id))
 
-  const data: Partial<CommomQuestion> = {}
-
-  if (question.trim() === '') {
-    data.question = question
-  }
-
-  if (answer.trim() === '') {
-    data.answer = answer
-  }
-
-  const commonQuestion = await prisma.commomQuestion.update({
-    where: {
-      id: Number(id)
-    },
-    data
-  })
-
-  if (commonQuestion === undefined || commonQuestion === null) {
+    return {
+      error: false,
+      message: 'Conteúdo da página deletado com sucesso!'
+    }
+  } catch (error) {
+    console.error('Error deleting document: ', error)
     return {
       error: true,
-      message: 'It was not possible to update a common question.'
+      message: (error as Error).message
     }
   }
-
-  return commonQuestion
-}
-
-export const deleteCommonQuestion = async (id: number): Promise<boolean> => {
-  const existCommonQuestion = await prisma.commomQuestion.findFirst({
-    where: {
-      id
-    }
-  })
-
-  if (existCommonQuestion === undefined || existCommonQuestion === null) {
-    return true
-  }
-
-  await prisma.article.delete({
-    where: {
-      id
-    }
-  })
-
-  return true
 }

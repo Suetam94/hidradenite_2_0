@@ -2,51 +2,29 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import nookies from 'nookies'
-import { logUser, validateUserBeforeLogIn } from '@/app/lib/User'
-import { type IGetUser } from '@/app/lib/interfaces'
 import FeedbackModal from '@/app/ui/feedback-modal'
 import Spinner from '@/app/ui/Spinner'
+import { loginUser } from '@/app/lib/User'
 
-interface LoginFormProps {
-  onToggleForm: (formType: string) => void
-}
-
-const LoginForm = ({ onToggleForm }: LoginFormProps): React.JSX.Element => {
-  const [username, setUsername] = useState<string>('')
+const LoginForm = (): React.JSX.Element => {
+  const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [modalTitle, setModalTitle] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const router = useRouter()
 
-  const handleUserCookies = (user: Omit<IGetUser, 'error'>): void => {
-    nookies.set(null, 'user', JSON.stringify(user), {
-      maxAge: 3600 * 24 * 360,
-      path: '/'
-    })
-  }
-
   const handleLogUser = async (): Promise<void> => {
     try {
       setIsLoading(true)
-      const { username: validateUsername, password: validatedPassword, error, message } = await validateUserBeforeLogIn({ username, password })
 
-      if (error !== undefined && error) {
-        throw new Error(JSON.stringify(message))
+      const { error, message } = await loginUser({ email, password })
+
+      if (error) {
+        throw new Error(message)
       }
 
-      if (validateUsername !== undefined && validatedPassword !== undefined) {
-        const loggedUser = await logUser({ username: validateUsername, password: validatedPassword })
-        const { error, ...user } = loggedUser
-        if (error) {
-          throw new Error('Não foi possível fazer login.')
-        }
-
-        handleUserCookies(user)
-        setIsLoading(false)
-        router.push('/dashboard')
-      }
+      router.push('/dashboard')
     } catch (e) {
       const err = e as Error
       setModalTitle(err.message)
@@ -64,15 +42,15 @@ const LoginForm = ({ onToggleForm }: LoginFormProps): React.JSX.Element => {
       <h2 className="text-2xl font-bold text-center text-gray-800 mb-4">Login</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="username" className="block text-gray-700 font-semibold mb-1">Nome de usuário</label>
+          <label htmlFor="username" className="block text-gray-700 font-semibold mb-1">Email</label>
           <input
             required
             type="text"
-            id="username"
-            name="username"
-            value={username}
+            id="email"
+            name="email"
+            value={email}
             onChange={(e) => {
-              setUsername(e.target.value)
+              setEmail(e.target.value)
             }}
             placeholder="Digite seu nome de usuário"
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-400 focus:ring focus:ring-blue-200 px-4 py-2"
@@ -100,14 +78,6 @@ const LoginForm = ({ onToggleForm }: LoginFormProps): React.JSX.Element => {
           {isLoading ? <Spinner /> : 'Entrar'}
         </button>
       </form>
-      <p
-        className="text-center mt-4 text-blue-600 cursor-pointer"
-        onClick={() => {
-          onToggleForm('register')
-        }}
-      >
-        Registrar
-      </p>
       <FeedbackModal isOpen={isModalOpen} onClose={setIsModalOpen} title={modalTitle} />
     </div>
 

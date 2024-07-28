@@ -3,11 +3,10 @@
 import React, { useState } from 'react'
 import DeleteModal from '@/app/ui/delete-modal'
 import FeedbackModal from '@/app/ui/feedback-modal'
-import { type CommomQuestion } from '@prisma/client'
-import { deleteArticle } from '@/app/lib/Article'
+import { deleteCommonQuestion, type ICommonQuestionData } from '@/app/lib/CommonQuestion'
 import CommonQuestionModal from '@/app/ui/common-questions/common-question-modal'
 
-interface ICommonQuestion extends CommomQuestion {
+interface ICommonQuestion extends ICommonQuestionData {
   isUpdating: boolean
 }
 
@@ -21,10 +20,10 @@ const CommonQuestionCard = ({
   const [deleteModal, setDeleteModal] = useState<boolean>(false)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
 
-  const handleDeleteCommonQuestion = (id: number): boolean => {
+  const handleDeleteCommonQuestion = (id: string): boolean => {
     try {
       void (async () => {
-        await deleteArticle(id)
+        await deleteCommonQuestion(id)
       })()
       return true
     } catch (e) {

@@ -4,7 +4,14 @@ import React from 'react'
 import { Carousel } from 'react-responsive-carousel'
 import 'react-responsive-carousel/lib/styles/carousel.min.css'
 import GroupSupportCard from './support-group-card'
-import { type INormalizedSupportGroupEvent } from '@/app/lib/interfaces'
+
+export interface INormalizedSupportGroupEvent {
+  id: string
+  eventDate: string
+  location: string
+  eventTime: string
+  mediaURL: string
+}
 
 interface IShowSupportGroup {
   supportGroups: INormalizedSupportGroupEvent[]
@@ -44,7 +51,7 @@ const GroupSupportCarousel = ({ supportGroups }: IShowSupportGroup): React.JSX.E
     >
       {supportGroups.map((event, index) => (
         <div key={index}>
-          <GroupSupportCard imageString={event.image} eventTime={event.eventTime} eventDate={event.eventDate} location={event.location} isSvg={event.isSvg} />
+          <GroupSupportCard imageString={event.mediaURL} eventTime={event.eventTime} eventDate={event.eventDate} location={event.location} id={event.id} isUpdating={false} />
         </div>
       ))}
     </Carousel>

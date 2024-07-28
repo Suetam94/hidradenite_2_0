@@ -2,11 +2,18 @@
 
 import React, { useEffect, useState } from 'react'
 import Spinner from '@/app/ui/Spinner'
-import { type AboutUs } from '@prisma/client'
-import { updateAboutUs, validateUpdateAboutUs } from '@/app/lib/AboutUs'
+import { updateAboutUs } from '@/app/lib/AboutUs'
+
+export interface IAboutUs {
+  id?: string
+  title?: string
+  content?: string
+  imageString?: string
+  isUpdating?: boolean
+}
 
 interface ICommonQuestionModal {
-  aboutUs?: Partial<AboutUs>
+  aboutUs?: Partial<IAboutUs>
   isUpdating?: boolean
   modalResponse: (success: boolean) => void
   closeModal: (isOpen: boolean) => void
@@ -18,7 +25,7 @@ const AboutUsModal = ({ aboutUs, modalResponse, isUpdating, closeModal }: ICommo
     content: '',
     media: '' as unknown as File
   })
-  const [actualFormData, setActualFormData] = useState<Partial<AboutUs> | undefined>()
+  const [actualFormData, setActualFormData] = useState<Partial<IAboutUs> | undefined>()
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
@@ -32,7 +39,7 @@ const AboutUsModal = ({ aboutUs, modalResponse, isUpdating, closeModal }: ICommo
       setIsLoading(true)
       const form = new FormData()
 
-      if (actualFormData !== undefined && actualFormData.id !== 0) {
+      if (actualFormData !== undefined && actualFormData.id !== '') {
         form.append('id', actualFormData.id as unknown as string)
       }
 
@@ -40,13 +47,11 @@ const AboutUsModal = ({ aboutUs, modalResponse, isUpdating, closeModal }: ICommo
       form.append('content', formData.content)
       form.append('media', formData.media)
 
-      const { error, message } = await validateUpdateAboutUs(form)
+      const { error, message } = await updateAboutUs(form)
 
       if (error) {
-        throw new Error(JSON.stringify(message))
+        throw new Error(message)
       }
-
-      await updateAboutUs(form)
 
       modalResponse(true)
       closeModal(false)

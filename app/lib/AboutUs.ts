@@ -1,206 +1,146 @@
 'use server'
 
-import prisma from '@/app/lib/prisma.context'
-import { type IGeneralValidated, type INormalizedAboutUs } from '@/app/lib/interfaces'
-import { createAboutUsSchema, updateAboutUsSchema } from '@/app/lib/schemas'
-import type { AboutUs } from '@prisma/client'
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  type QuerySnapshot,
+  updateDoc
+} from 'firebase/firestore'
+import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+import { db, storage } from '@/config/firebase'
+import { createAboutUsSchema, updateAboutUsSchema } from '@/app/lib/validation/about-us'
+import { type ZodSchema } from 'zod'
 
-export const validateCreateAboutUs = async (formData: FormData): Promise<IGeneralValidated> => {
-  const title = formData.get('title') as string
-  const content = formData.get('content') as string
-  let media
-
-  if (formData.get('media') !== '') {
-    media = formData.get('media') as File | undefined
-  }
-
-  let mediaContent
-
-  if (media != null) {
-    const mediaArrayBuffer = await media.arrayBuffer()
-    mediaContent = Buffer.from(mediaArrayBuffer)
-  }
-
-  const data = {
-    title,
-    content,
-    media: mediaContent
-  }
-
-  const validatedData = createAboutUsSchema.safeParse(data)
-
-  if (!validatedData.success) {
-    return {
-      error: true,
-      message: JSON.stringify(validatedData.error.flatten().fieldErrors)
-    }
-  }
-
-  return {
-    error: false,
-    aboutUs: validatedData.data
-  }
+export interface ICreateAboutUsData {
+  title: string
+  content: string
+  mediaURL?: string
 }
 
-export const createAboutUs = async (formData: FormData): Promise<AboutUs | IGeneralValidated> => {
+export interface IAboutUsData {
+  id: string
+  title: string
+  content: string
+  mediaURL?: string
+}
+
+interface IReturn {
+  error: boolean
+  message: string
+}
+
+async function uploadMedia (mediaFile: File | null): Promise<string> {
+  if (mediaFile == null) return ''
+  const storageRef = ref(storage, `aboutUsMedia/${mediaFile.name}`)
+  const snapshot = await uploadBytes(storageRef, mediaFile)
+  return await getDownloadURL(snapshot.ref)
+}
+
+async function validateSchema<Data> (schema: ZodSchema<Data>, data: any): Promise<IReturn | null> {
+  const validation = schema.safeParse(data)
+  if (!(validation.success)) {
+    return {
+      error: true,
+      message: validation.error.message
+    }
+  }
+  return null
+}
+
+export async function createAboutUs (formData: FormData): Promise<IReturn> {
   const title = formData.get('title') as string
   const content = formData.get('content') as string
-  let media
+  const mediaFile = formData.get('media') as File | null
 
-  if (formData.get('media') !== '') {
-    media = formData.get('media') as File | undefined
-  }
+  const validationResult = await validateSchema(createAboutUsSchema, { title, content, mediaFile })
+  if (validationResult != null) return validationResult
 
-  let mediaContent
+  try {
+    const mediaURL = await uploadMedia(mediaFile)
 
-  if (media != null) {
-    const mediaArrayBuffer = await media.arrayBuffer()
-    mediaContent = Buffer.from(mediaArrayBuffer)
-  }
-
-  const aboutUs = await prisma.aboutUs.create({
-    data: {
+    await addDoc(collection(db, 'aboutUs'), {
       title,
       content,
-      media: mediaContent
-    }
-  })
+      mediaURL
+    } satisfies ICreateAboutUsData)
 
-  if (aboutUs === undefined || aboutUs === null) {
+    return {
+      error: false,
+      message: 'Novo conteúdo da página criado com sucesso!'
+    }
+  } catch (error) {
+    console.error('Error creating document: ', error)
     return {
       error: true,
-      message: 'It was not possible to create a new about us.'
+      message: (error as Error).message
     }
   }
-
-  return aboutUs
 }
 
-export const listAboutUs = async (): Promise<INormalizedAboutUs[]> => {
-  const aboutUs = await prisma.aboutUs.findMany()
-
-  let normalizedAboutUs: INormalizedAboutUs[] = []
-
-  if (aboutUs.length > 0) {
-    normalizedAboutUs = aboutUs.map(about => {
-      const isSvg = about.media !== null && about.media.toString('utf-8').startsWith('<svg') as boolean
-      const media = about.media !== null ? about.media.toString('base64') : undefined
-      return {
-        ...about,
-        media,
-        isSvg
-      }
-    })
-  }
-
-  return normalizedAboutUs
+export async function readAboutUs (): Promise<IAboutUsData[]> {
+  const querySnapshot: QuerySnapshot = await getDocs(collection(db, 'aboutUs'))
+  return querySnapshot.docs.map((doc: { id: string, data: () => any }) => ({
+    id: doc.id,
+    ...doc.data()
+  })) as IAboutUsData[]
 }
 
-export const validateUpdateAboutUs = async (formData: FormData): Promise<IGeneralValidated> => {
-  const id = formData.get('id') as string
-  let title = formData.get('title') as string | undefined
-  let content = formData.get('content') as string | undefined
-  let media
-
-  const data: Partial<AboutUs> = {
-    id: parseInt(id)
-  }
-
-  if (formData.get('media') !== '') {
-    media = formData.get('media') as File | undefined
-  }
-  if (formData.get('title') !== '') {
-    title = formData.get('title') as string | undefined
-    data.title = title
-  }
-  if (formData.get('content') !== '') {
-    content = formData.get('content') as string | undefined
-    data.content = content
-  }
-
-  let mediaArrayBuffer: ArrayBuffer
-  let mediaContent: Buffer | undefined
-
-  if (media !== undefined) {
-    mediaArrayBuffer = await media.arrayBuffer()
-    mediaContent = Buffer.from(mediaArrayBuffer)
-    data.media = mediaContent
-  }
-
-  const validatedData = updateAboutUsSchema.safeParse(data)
-
-  if (!validatedData.success) {
-    console.log(JSON.stringify(validatedData.error.flatten().fieldErrors))
-    return {
-      error: true,
-      message: JSON.stringify(validatedData.error.flatten().fieldErrors)
-    }
-  }
-
-  return {
-    error: false,
-    aboutUs: validatedData.data
-  }
-}
-
-export const updateAboutUs = async (formData: FormData): Promise<AboutUs | IGeneralValidated> => {
+export async function updateAboutUs (formData: FormData): Promise<IReturn> {
   const id = formData.get('id') as string
   const title = formData.get('title') as string
   const content = formData.get('content') as string
-  let media
+  const mediaFile = formData.get('media') as File | null
 
-  if (formData.get('media') !== '') {
-    media = formData.get('media') as File | undefined
-  }
+  const validationResult = await validateSchema(updateAboutUsSchema, { title, content, mediaFile })
+  if (validationResult != null) return validationResult
 
-  const data: Partial<AboutUs> = {}
+  try {
+    let mediaURL = ''
+    if (mediaFile != null) {
+      mediaURL = await uploadMedia(mediaFile)
+    }
 
-  if (media !== undefined) {
-    const mediaArrayBuffer = await media.arrayBuffer()
-    data.media = Buffer.from(mediaArrayBuffer)
-  }
+    const docRef = doc(db, 'aboutUs', id)
+    await updateDoc(docRef, {
+      title,
+      content,
+      ...((mediaURL !== '') && { mediaURL })
+    })
 
-  if (title.trim() !== '') {
-    data.title = title
-  }
-
-  if (content.trim() !== '') {
-    data.content = content
-  }
-
-  const aboutUs = await prisma.aboutUs.update({
-    where: {
-      id: Number(id)
-    },
-    data
-  })
-
-  if (aboutUs === undefined || aboutUs === null) {
+    return {
+      error: false,
+      message: 'Conteúdo da página atualizado com sucesso!'
+    }
+  } catch (error) {
+    console.error('Error updating document: ', error)
     return {
       error: true,
-      message: 'It was not possible to update an about us.'
+      message: (error as Error).message
     }
   }
-
-  return aboutUs
 }
 
-export const deleteAboutUs = async (id: number): Promise<boolean> => {
-  const existAboutUs = await prisma.aboutUs.findFirst({
-    where: {
-      id
+export async function deleteAboutUs (id: string, mediaURL?: string): Promise<IReturn> {
+  try {
+    if (mediaURL != null) {
+      const storageRef = ref(storage, mediaURL)
+      await deleteObject(storageRef)
     }
-  })
 
-  if (existAboutUs === undefined || existAboutUs === null) {
-    return true
+    await deleteDoc(doc(db, 'aboutUs', id))
+
+    return {
+      error: false,
+      message: 'Conteúdo da página deletado com sucesso!'
+    }
+  } catch (error) {
+    console.error('Error deleting document: ', error)
+    return {
+      error: true,
+      message: (error as Error).message
+    }
   }
-
-  await prisma.aboutUs.delete({
-    where: {
-      id
-    }
-  })
-
-  return true
 }

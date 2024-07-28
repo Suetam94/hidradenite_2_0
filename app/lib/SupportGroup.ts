@@ -1,211 +1,153 @@
 'use server'
 
-import { type SupportGroup } from '@prisma/client'
-import { type IGeneralValidated, type INormalizedSupportGroupEvent } from '@/app/lib/interfaces'
-import { supportGroupEventSchema, updateSupportGroupEventSchema } from '@/app/lib/schemas'
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  type QuerySnapshot,
+  updateDoc
+} from 'firebase/firestore'
+import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+import { db, storage } from '@/config/firebase'
+import { createSupportGroupSchema, updateSupportGroupSchema } from '@/app/lib/validation/support-group'
+import type { ZodSchema } from 'zod'
 
-import prisma from '@/app/lib/prisma.context'
+export interface ICreateSupportGroupData {
+  eventDate: string
+  location: string
+  eventTime: string
+  mediaURL?: string
+}
 
-export const validateCreateSupportGroupEvent = async (formData: FormData): Promise<IGeneralValidated> => {
-  const eventDate = formData.get('eventDate') as string
-  const location = formData.get('location') as string
-  const eventTime = formData.get('eventTime') as string
-  const image = formData.get('image') as File
+export interface ISupportGroupData extends Required<ICreateSupportGroupData> {
+  id: string
+}
 
-  const mediaArrayBuffer = await image.arrayBuffer()
-  const mediaContent = Buffer.from(mediaArrayBuffer)
+interface IReturn {
+  error: boolean
+  message: string
+}
 
-  const data = {
-    eventDate,
-    location,
-    eventTime,
-    image: mediaContent
-  }
+async function uploadMedia (mediaFile: File | null, path: string): Promise<string> {
+  if (mediaFile == null) return ''
+  const storageRef = ref(storage, `${path}/${mediaFile.name}`)
+  const snapshot = await uploadBytes(storageRef, mediaFile)
+  return await getDownloadURL(snapshot.ref)
+}
 
-  const validatedData = supportGroupEventSchema.safeParse(data)
-
-  if (!validatedData.success) {
+async function validateSchema<Data> (schema: ZodSchema<Data>, data: any): Promise<IReturn | null> {
+  const validation = schema.safeParse(data)
+  if (!validation.success) {
     return {
       error: true,
-      message: JSON.stringify(validatedData.error.flatten().fieldErrors)
+      message: validation.error.message
     }
   }
-
-  return {
-    error: false,
-    supportGroup: validatedData.data
-  }
+  return null
 }
 
-export const createSupportGroupEvent = async (formData: FormData): Promise<SupportGroup | IGeneralValidated> => {
+export async function createSupportGroup (formData: FormData): Promise<IReturn> {
   const eventDate = formData.get('eventDate') as string
   const location = formData.get('location') as string
   const eventTime = formData.get('eventTime') as string
-  const image = formData.get('image') as File
+  const image = formData.get('image') as File | null
 
-  const mediaArrayBuffer = await image.arrayBuffer()
-  const mediaContent = Buffer.from(mediaArrayBuffer)
+  const validationResult = await validateSchema(createSupportGroupSchema, { eventDate, location, eventTime, image })
+  if (validationResult != null) return validationResult
 
-  if (mediaContent !== undefined) {
-    const supportGroupEvent = await prisma.supportGroup.create({
-      data: {
-        eventTime,
-        eventDate,
-        location,
-        image: mediaContent
-      }
-    })
+  try {
+    const mediaURL = await uploadMedia(image, 'supportGroupMedia')
 
-    if (supportGroupEvent === undefined || supportGroupEvent === null) {
-      return {
-        error: true,
-        message: 'It was not possible to create a new support group event.'
-      }
+    await addDoc(collection(db, 'supportGroup'), {
+      eventDate,
+      location,
+      eventTime,
+      mediaURL
+    } satisfies ICreateSupportGroupData)
+
+    return {
+      error: false,
+      message: 'Novo conteúdo da página criado com sucesso!'
     }
-
-    return supportGroupEvent
-  }
-
-  return {
-    error: true,
-    message: 'It was not possible to create a new support group event.'
+  } catch (error) {
+    console.error('Error creating document: ', error)
+    return {
+      error: true,
+      message: (error as Error).message
+    }
   }
 }
 
-export const listSupportGroupEvent = async (): Promise<INormalizedSupportGroupEvent[]> => {
-  const supportGroups = await prisma.supportGroup.findMany()
-
-  let normalizedSupportGroups: INormalizedSupportGroupEvent[] = []
-
-  if (supportGroups.length > 0) {
-    normalizedSupportGroups = supportGroups.map(group => {
-      const isSvg = group.image.toString('utf-8').startsWith('<svg') as boolean
-      const image = group.image.toString('base64')
-      return {
-        ...group,
-        image,
-        isSvg
-      }
-    })
+export async function readSupportGroup (): Promise<ISupportGroupData[]> {
+  try {
+    const querySnapshot: QuerySnapshot = await getDocs(collection(db, 'supportGroup'))
+    return querySnapshot.docs.map((doc: { id: string, data: () => any }) => ({
+      id: doc.id,
+      ...doc.data()
+    })) as ISupportGroupData[]
+  } catch (error) {
+    console.error('Error reading documents: ', error)
+    return []
   }
-
-  return normalizedSupportGroups
 }
 
-export const validateUpdateSupportGroupEvent = async (formData: FormData): Promise<IGeneralValidated> => {
+export async function updateSupportGroup (formData: FormData): Promise<IReturn> {
   const id = formData.get('id') as string
-  let eventDate = formData.get('eventDate') as string | undefined
-  let location = formData.get('location') as string | undefined
-  let eventTime = formData.get('eventTime') as string | undefined
-  let image
-
-  if (formData.get('image') !== '') {
-    image = formData.get('image') as File | undefined
-  }
-  if (formData.get('eventDate') !== '') {
-    eventDate = formData.get('eventDate') as string | undefined
-  }
-  if (formData.get('location') !== '') {
-    location = formData.get('location') as string | undefined
-  }
-  if (formData.get('eventTime') !== '') {
-    eventTime = formData.get('eventTime') as string | undefined
-  }
-
-  let mediaArrayBuffer: ArrayBuffer
-  let mediaContent: Buffer | undefined
-
-  if (image !== undefined) {
-    mediaArrayBuffer = await image.arrayBuffer()
-    mediaContent = Buffer.from(mediaArrayBuffer)
-  }
-
-  const data: Partial<SupportGroup> = {
-    id: Number(id),
-    eventDate,
-    location,
-    eventTime,
-    image: mediaContent
-  }
-
-  const validatedData = updateSupportGroupEventSchema.safeParse(data)
-
-  if (!validatedData.success) {
-    return {
-      error: true,
-      message: JSON.stringify(validatedData.error.flatten().fieldErrors)
-    }
-  }
-
-  return {
-    error: false,
-    updatedSupportGroup: validatedData.data
-  }
-}
-
-export const updateSupportGroupEvent = async (formData: FormData): Promise<SupportGroup | IGeneralValidated> => {
-  const id = formData.get('id') as unknown as number
   const eventDate = formData.get('eventDate') as string
   const location = formData.get('location') as string
   const eventTime = formData.get('eventTime') as string
-  let image
+  const image = formData.get('image') as File | null
 
-  if (formData.get('image') !== '') {
-    image = formData.get('image') as File | undefined
-  }
+  const validationResult = await validateSchema(updateSupportGroupSchema, { id, eventDate, location, eventTime, image })
+  if (validationResult != null) return validationResult
 
-  const data: Partial<SupportGroup> = {}
+  try {
+    let mediaURL = ''
+    if (image != null) {
+      mediaURL = await uploadMedia(image, 'supportGroupMedia')
+    }
 
-  if (image !== undefined) {
-    const mediaArrayBuffer = await image.arrayBuffer()
-    data.image = Buffer.from(mediaArrayBuffer)
-  }
+    const docRef = doc(db, 'supportGroup', id)
+    await updateDoc(docRef, {
+      eventDate,
+      location,
+      eventTime,
+      ...((mediaURL !== '') && { mediaURL })
+    })
 
-  if (eventDate.trim() !== '') {
-    data.eventDate = eventDate
-  }
-
-  if (location.trim() !== '') {
-    data.location = location
-  }
-
-  if (eventTime.trim() !== '') {
-    data.eventTime = eventTime
-  }
-
-  const supportGroupEvent = await prisma.supportGroup.update({
-    where: {
-      id: Number(id)
-    },
-    data
-  })
-
-  if (supportGroupEvent === undefined || supportGroupEvent === null) {
+    return {
+      error: false,
+      message: 'Conteúdo da página atualizado com sucesso!'
+    }
+  } catch (error) {
+    console.error('Error updating document: ', error)
     return {
       error: true,
-      message: 'It was not possible to update a support group event.'
+      message: (error as Error).message
     }
   }
-
-  return supportGroupEvent
 }
 
-export const deleteSupportGroupEvent = async (id: number): Promise<boolean> => {
-  const existSupportGroup = await prisma.supportGroup.findFirst({
-    where: {
-      id
+export async function deleteSupportGroup (id: string, mediaURL?: string): Promise<IReturn> {
+  try {
+    if (mediaURL != null) {
+      const storageRef = ref(storage, mediaURL)
+      await deleteObject(storageRef)
     }
-  })
 
-  if (existSupportGroup === undefined || existSupportGroup === null) {
-    return true
+    await deleteDoc(doc(db, 'supportGroup', id))
+
+    return {
+      error: false,
+      message: 'Conteúdo da página deletado com sucesso!'
+    }
+  } catch (error) {
+    console.error('Error deleting document: ', error)
+    return {
+      error: true,
+      message: (error as Error).message
+    }
   }
-
-  await prisma.supportGroup.delete({
-    where: {
-      id
-    }
-  })
-
-  return true
 }

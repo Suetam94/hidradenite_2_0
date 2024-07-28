@@ -2,11 +2,10 @@
 
 import React, { useEffect, useState } from 'react'
 import Spinner from '@/app/ui/Spinner'
-import { updateSupportGroupEvent, validateUpdateSupportGroupEvent } from '@/app/lib/SupportGroup'
-import { type SupportGroup } from '@prisma/client'
+import { type ISupportGroupData, updateSupportGroup } from '@/app/lib/SupportGroup'
 
 interface ISupportGroupModal {
-  supportGroup?: Partial<SupportGroup>
+  supportGroup?: Partial<ISupportGroupData>
   isUpdating?: boolean
   modalResponse: (success: boolean) => void
   closeModal: (isOpen: boolean) => void
@@ -19,7 +18,7 @@ const SupportGroupModal = ({ supportGroup, modalResponse, isUpdating, closeModal
     eventTime: '',
     image: '' as unknown as File
   })
-  const [actualFormData, setActualFormData] = useState<Partial<SupportGroup> | undefined>()
+  const [actualFormData, setActualFormData] = useState<Partial<ISupportGroupData> | undefined>()
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
@@ -33,7 +32,7 @@ const SupportGroupModal = ({ supportGroup, modalResponse, isUpdating, closeModal
       setIsLoading(true)
       const form = new FormData()
 
-      if (actualFormData !== undefined && actualFormData.id !== 0) {
+      if (actualFormData !== undefined && actualFormData.id !== '') {
         form.append('id', actualFormData.id as unknown as string)
       }
 
@@ -42,13 +41,11 @@ const SupportGroupModal = ({ supportGroup, modalResponse, isUpdating, closeModal
       form.append('eventTime', formData.eventTime)
       form.append('image', formData.image)
 
-      const { error, message } = await validateUpdateSupportGroupEvent(form)
+      const { error, message } = await updateSupportGroup(form)
 
       if (error) {
-        throw new Error(JSON.stringify(message))
+        throw new Error(message)
       }
-
-      await updateSupportGroupEvent(form)
 
       modalResponse(true)
       setIsLoading(false)

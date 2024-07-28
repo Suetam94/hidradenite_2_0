@@ -3,8 +3,7 @@
 import React, { useState } from 'react'
 import Spinner from '@/app/ui/Spinner'
 import FeedbackModal from '@/app/ui/feedback-modal'
-import { type IGeneralValidated } from '@/app/lib/interfaces'
-import { createAboutUs, validateCreateAboutUs } from '@/app/lib/AboutUs'
+import { createAboutUs } from '@/app/lib/AboutUs'
 
 const CreateAboutUs = (): React.JSX.Element => {
   const [modalOpen, setModalOpen] = useState(false)
@@ -30,22 +29,15 @@ const CreateAboutUs = (): React.JSX.Element => {
       form.append('content', formData.content)
       form.append('media', formData.media)
 
-      const { error, message } = await validateCreateAboutUs(form)
+      const { error, message } = await createAboutUs(form)
 
       if (error) {
-        throw new Error(JSON.stringify(message))
-      }
-
-      const newAboutUs = await createAboutUs(form)
-      const { error: createAboutUsError, message: createAboutUsMessage } = newAboutUs as IGeneralValidated
-
-      if (createAboutUsError) {
-        throw new Error(JSON.stringify(createAboutUsMessage))
+        throw new Error(message)
       }
 
       setIsLoading(false)
 
-      setModalTitle('Nova seção da página sobre nós criada com sucesso!')
+      setModalTitle(message)
       setIsModalOpen(true)
     } catch (e) {
       const err = e as Error

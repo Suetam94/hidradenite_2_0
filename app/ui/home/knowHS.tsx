@@ -1,10 +1,10 @@
 import React from 'react'
 import Instagram from '@/app/ui/social/instagram'
 import Statistics from '@/app/ui/home/statistics'
-import { getPageContentByPageTitle } from '@/app/lib/PageContent'
+import { getTextContent } from '@/app/lib/PageConfig'
 
 const KnowHs = async (): Promise<React.JSX.Element> => {
-  const pageContent = await getPageContentByPageTitle('home', 'text-aside-instagram')
+  const { data } = await getTextContent('text-aside-instagram')
 
   return (
     <section className="w-full flex justify-center items-center bg-silver px-5 xl:px-0">
@@ -17,8 +17,8 @@ const KnowHs = async (): Promise<React.JSX.Element> => {
             <h2 className="uppercase text-3xl text-title-gray font-bold text-center mb-5">
               conheça mais sobre a hidradenite supurativa
             </h2>
-            {(pageContent != null) && <p className="text-justify text-lg text-subtitle-gray">
-              {pageContent.textContent}
+            {(data !== undefined) && <p className="text-justify text-lg text-subtitle-gray">
+              {data.textContent?.text}
             </p>}
             <Statistics />
           </div>

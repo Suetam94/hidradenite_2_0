@@ -3,34 +3,29 @@
 import React, { useState } from 'react'
 import DeleteModal from '@/app/ui/delete-modal'
 import FeedbackModal from '@/app/ui/feedback-modal'
-import { type IAboutUs } from '@/app/lib/interfaces'
 import AboutUsModal from '@/app/ui/about-us/about-us-modal'
 import { deleteAboutUs } from '@/app/lib/AboutUs'
+
+export interface IAboutUs {
+  id?: string
+  title?: string
+  content?: string
+  imageString?: string
+  isUpdating?: boolean
+}
 
 const AboutUsCard = ({
   id,
   title,
   content,
   imageString,
-  isSvg,
   isUpdating = false
 }: IAboutUs): React.JSX.Element => {
   const [modalResponse, setModalResponse] = useState<boolean>()
   const [deleteModal, setDeleteModal] = useState<boolean>(false)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
 
-  let dataUrl
-  if (imageString !== undefined) {
-    if (isSvg === true) {
-      dataUrl = `data:image/svg+xml;base64, ${imageString}`
-    } else {
-      dataUrl = `data:image/png;base64, ${imageString}`
-    }
-  }
-
-  console.log(modalResponse)
-
-  const handleDeleteAboutUs = (id: number): boolean => {
+  const handleDeleteAboutUs = (id: string): boolean => {
     try {
       void (async () => {
         await deleteAboutUs(id)
@@ -44,7 +39,7 @@ const AboutUsCard = ({
 
   return (
     <div className="rounded-lg shadow-md bg-white overflow-hidden p-10">
-      {dataUrl !== undefined ? <img src={dataUrl} alt="Grupo de apoio" className="w-full h-40 object-fit-contain" /> : <div className="h-40 w-full"></div>}
+      {imageString !== undefined ? <img src={imageString} alt="Grupo de apoio" className="w-full h-40 object-fit-contain" /> : <div className="h-40 w-full"></div>}
       <div className="px-4 py-4">
         <h3 className="text-2xl font-semibold text-gray-800">Grupo de Apoio</h3>
       </div>
@@ -93,7 +88,7 @@ const AboutUsCard = ({
       {modalResponse === true && modalResponse !== undefined && <FeedbackModal
         isOpen={modalResponse as boolean}
         onClose={setModalResponse}
-        title={'Registro atualizado com sucesso'}
+        title={'Registro deletado com sucesso'}
       />}
     </div>
   )

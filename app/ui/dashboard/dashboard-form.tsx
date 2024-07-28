@@ -2,34 +2,39 @@
 
 import React, { useEffect, useState } from 'react'
 import ConfirmationModal from '@/app/ui/confirmation-modal'
-import { getPageContentByPageTitle, pageContent } from '@/app/lib/PageContent'
-import { type IDashboardForm } from '@/app/lib/interfaces'
 import Spinner from '@/app/ui/Spinner'
+import { getTextContent, saveTextContent } from '@/app/lib/PageConfig'
+import FeedbackModal from '@/app/ui/feedback-modal'
+
+export interface IDashboardForm {
+  formTitle: string
+  contentId: string
+  defaultColor?: string
+}
 
 const DashboardForm = ({
-  page,
-  contentId,
   formTitle,
-  defaultColor
+  defaultColor,
+  contentId
 }: IDashboardForm): React.JSX.Element => {
   const [textValue, setTextValue] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [modalTitle, setModalTitle] = useState<string>('')
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
 
   useEffect(() => {
     void (async () => {
       setIsLoading(true)
-      const pageContent = await getPageContentByPageTitle(page, contentId)
-      if (pageContent !== null) {
-        const { textContent } = pageContent
-        if (textContent !== null) {
-          setTextValue(textContent)
-        }
+      const { data } = await getTextContent(contentId)
+      if (data !== undefined) {
+        const { textContent } = data
+        setTextValue(textContent?.text ?? '')
       }
       setIsLoading(false)
     })()
-  }, [page])
+  }, [])
 
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault()
@@ -46,20 +51,25 @@ const DashboardForm = ({
   }
 
   const handleSave = async (answer: boolean): Promise<void> => {
-    setIsModalOpen(false)
-    setIsEditing(false)
-    if (answer) {
-      setIsLoading(true)
-      if (textValue !== undefined) {
-        await pageContent({
-          page,
-          contentId,
-          textContent: textValue,
-          color: defaultColor
-        }, 'text')
+    try {
+      setIsModalOpen(false)
+      setIsEditing(false)
+      if (answer) {
+        setIsLoading(true)
+        if (textValue !== undefined) {
+          const { error, message } = await saveTextContent(textValue, defaultColor ?? '', contentId)
+
+          if (error) {
+            throw new Error(message)
+          }
+        }
       }
+      setIsLoading(false)
+    } catch (e) {
+      setIsLoading(false)
+      setModalTitle((e as Error).message)
+      setIsModalOpen(true)
     }
-    setIsLoading(false)
   }
 
   return (
@@ -104,6 +114,7 @@ const DashboardForm = ({
         </button>
       </div>
       <ConfirmationModal isOpen={isModalOpen} onSave={handleSave} />
+      <FeedbackModal isOpen={feedbackOpen} onClose={setFeedbackOpen} title={modalTitle} />
     </form>
   )
 }

@@ -1,9 +1,9 @@
 import React from 'react'
 import ArticleCard from '@/app/ui/article/article-card'
-import { type Article } from '@prisma/client'
+import { type IArticleData } from '@/app/lib/Article'
 
 interface IArticle {
-  articles: Article[]
+  articles: IArticleData[]
 }
 
 const ShowArticle = ({ articles }: IArticle): React.JSX.Element => {

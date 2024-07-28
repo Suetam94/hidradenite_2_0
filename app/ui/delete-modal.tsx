@@ -8,8 +8,8 @@ import Spinner from '@/app/ui/Spinner'
 interface IDeleteModal {
   isOpen: boolean
   closeModal: (isOpen: boolean) => void
-  deleteAction: (param: number) => boolean
-  param: number
+  deleteAction: (param: string) => boolean
+  param: string
 }
 
 const DeleteModal = ({ isOpen, closeModal, deleteAction, param }: IDeleteModal): React.JSX.Element => {

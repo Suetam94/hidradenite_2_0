@@ -3,8 +3,7 @@
 import React, { useState } from 'react'
 import Spinner from '@/app/ui/Spinner'
 import FeedbackModal from '@/app/ui/feedback-modal'
-import { validateCreateCommonQuestion, createCommonQuestion } from '@/app/lib/CommonQuestion'
-import { type IGeneralValidated } from '@/app/lib/interfaces'
+import { createCommonQuestion } from '@/app/lib/CommonQuestion'
 
 const CreateCommonQuestion = (): React.JSX.Element => {
   const [modalOpen, setModalOpen] = useState(false)
@@ -28,22 +27,15 @@ const CreateCommonQuestion = (): React.JSX.Element => {
       form.append('question', formData.question)
       form.append('answer', formData.answer)
 
-      const { error, message } = validateCreateCommonQuestion(form)
+      const { error, message } = await createCommonQuestion(form)
 
       if (error) {
-        throw new Error(JSON.stringify(message))
-      }
-
-      const newCommonQuestion = await createCommonQuestion(form)
-      const { error: newCommonQuestionError, message: newCommonQuestionMessage } = newCommonQuestion as IGeneralValidated
-
-      if (newCommonQuestionError) {
-        throw new Error(JSON.stringify(newCommonQuestionMessage))
+        throw new Error(message)
       }
 
       setIsLoading(false)
 
-      setModalTitle('Nova pergunta frequente criada com sucesso!')
+      setModalTitle(message)
       setIsModalOpen(true)
     } catch (e) {
       const err = e as Error

@@ -2,11 +2,10 @@
 
 import React, { useEffect, useState } from 'react'
 import Spinner from '@/app/ui/Spinner'
-import { type CommomQuestion } from '@prisma/client'
-import { validateUpdateCommonQuestion, updateCommonQuestion } from '@/app/lib/CommonQuestion'
+import { type ICommonQuestionData, updateCommonQuestion } from '@/app/lib/CommonQuestion'
 
 interface ICommonQuestionModal {
-  commonQuestion?: Partial<CommomQuestion>
+  commonQuestion?: Partial<ICommonQuestionData>
   isUpdating?: boolean
   modalResponse: (success: boolean) => void
   closeModal: (isOpen: boolean) => void
@@ -17,7 +16,7 @@ const CommonQuestionModal = ({ commonQuestion, modalResponse, isUpdating, closeM
     question: '',
     answer: ''
   })
-  const [actualFormData, setActualFormData] = useState<Partial<CommomQuestion> | undefined>()
+  const [actualFormData, setActualFormData] = useState<Partial<ICommonQuestionData> | undefined>()
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
@@ -31,20 +30,18 @@ const CommonQuestionModal = ({ commonQuestion, modalResponse, isUpdating, closeM
       setIsLoading(true)
       const form = new FormData()
 
-      if (actualFormData !== undefined && actualFormData.id !== 0) {
+      if (actualFormData !== undefined && actualFormData.id !== '') {
         form.append('id', actualFormData.id as unknown as string)
       }
 
       form.append('question', formData.question)
       form.append('answer', formData.answer)
 
-      const { error, message } = validateUpdateCommonQuestion(form)
+      const { error, message } = await updateCommonQuestion(form)
 
       if (error) {
-        throw new Error(JSON.stringify(message))
+        throw new Error(message)
       }
-
-      await updateCommonQuestion(form)
 
       modalResponse(true)
       setIsLoading(false)

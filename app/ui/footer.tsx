@@ -7,7 +7,7 @@ import { Browser, InstagramLogo, PaperPlaneTilt, TwitterLogo, YoutubeLogo } from
 
 const Footer = (): React.JSX.Element => {
   return (
-    <footer className="w-full min-h-80 bg-base-blue flex justify-center pb-5">
+    <footer className="w-full h-full min-h-80 bg-base-blue flex justify-center pb-5">
       <div
         className="w-full max-w-7xl flex flex-col lg:flex-row justify-center items-center lg:justify-between lg:items-start">
         <div className="text-white text-sm">

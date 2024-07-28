@@ -1,6 +1,13 @@
 import React from 'react'
-import { type IFeedbackModal } from '@/app/lib/interfaces'
 import { X } from '@phosphor-icons/react'
+
+export interface IFeedbackModal {
+  isOpen: boolean
+  onClose: (isOpen: boolean) => void
+  title: string
+  confirmAction?: (param: string) => void
+  confirmParam?: string
+}
 
 const FeedbackModal = ({ isOpen, onClose, title, confirmAction, confirmParam }: IFeedbackModal): React.JSX.Element | null => {
   if (!isOpen) {

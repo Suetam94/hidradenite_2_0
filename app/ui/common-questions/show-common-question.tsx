@@ -1,9 +1,9 @@
 import React from 'react'
-import { type CommomQuestion } from '@prisma/client'
 import CommonQuestionCard from '@/app/ui/common-questions/common-question-card'
+import { type ICommonQuestionData } from '@/app/lib/CommonQuestion'
 
 interface ICommonQuestion {
-  commonQuestions: CommomQuestion[]
+  commonQuestions: ICommonQuestionData[]
 }
 
 const ShowCommonQuestion = ({ commonQuestions }: ICommonQuestion): React.JSX.Element => {

@@ -1,11 +1,19 @@
 'use client'
 
 import React, { useState } from 'react'
-import { type ISupportGroupEvent } from '@/app/lib/interfaces'
 import SupportGroupModal from '@/app/ui/support-group/support-group-modal'
 import DeleteModal from '@/app/ui/delete-modal'
-import { deleteSupportGroupEvent } from '@/app/lib/SupportGroup'
+import { deleteSupportGroup } from '@/app/lib/SupportGroup'
 import FeedbackModal from '@/app/ui/feedback-modal'
+
+interface ISupportGroupCard {
+  id: string
+  eventTime: string
+  eventDate: string
+  location: string
+  imageString: string
+  isUpdating: boolean
+}
 
 const SupportGroupCard = ({
   id,
@@ -13,25 +21,16 @@ const SupportGroupCard = ({
   eventDate,
   location,
   imageString,
-  isSvg,
   isUpdating = false
-}: ISupportGroupEvent): React.JSX.Element => {
+}: ISupportGroupCard): React.JSX.Element => {
   const [modalResponse, setModalResponse] = useState<boolean>()
   const [deleteModal, setDeleteModal] = useState<boolean>(false)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
 
-  let dataUrl
-
-  if (isSvg === true) {
-    dataUrl = `data:image/svg+xml;base64, ${imageString}`
-  } else {
-    dataUrl = `data:image/png;base64, ${imageString}`
-  }
-
-  const handleDeleteSupportGroup = (id: number): boolean => {
+  const handleDeleteSupportGroup = (id: string): boolean => {
     try {
       void (async () => {
-        await deleteSupportGroupEvent(id)
+        await deleteSupportGroup(id)
       })()
       return true
     } catch (e) {
@@ -42,7 +41,7 @@ const SupportGroupCard = ({
 
   return (
     <div className="rounded-lg shadow-md bg-white overflow-hidden p-10">
-      <img src={dataUrl} alt="Grupo de apoio" className="w-full h-40 object-fit-contain" />
+      <img src={imageString} alt="Grupo de apoio" className="w-full h-40 object-fit-contain" />
       <div className="px-4 py-4">
         <h3 className="text-2xl font-semibold text-gray-800">Grupo de Apoio</h3>
       </div>

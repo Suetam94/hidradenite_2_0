@@ -3,8 +3,7 @@
 import React, { useState } from 'react'
 import Spinner from '@/app/ui/Spinner'
 import FeedbackModal from '@/app/ui/feedback-modal'
-import { createArticle, validateCreateArticle } from '@/app/lib/Article'
-import { type IGeneralValidated } from '@/app/lib/interfaces'
+import { createArticle } from '@/app/lib/Article'
 
 const CreateArticle = (): React.JSX.Element => {
   const [modalOpen, setModalOpen] = useState(false)
@@ -30,22 +29,15 @@ const CreateArticle = (): React.JSX.Element => {
       form.append('link', formData.link)
       form.append('resume', formData.resume)
 
-      const { error, message } = validateCreateArticle(form)
+      const { error, message } = await createArticle(form)
 
       if (error) {
-        throw new Error(JSON.stringify(message))
-      }
-
-      const newArticle = await createArticle(form)
-      const { error: newArticleError, message: newArticleMessage } = newArticle as IGeneralValidated
-
-      if (newArticleError) {
-        throw new Error(JSON.stringify(newArticleMessage))
+        throw new Error(message)
       }
 
       setIsLoading(false)
 
-      setModalTitle('Novo artigo criado com sucesso!')
+      setModalTitle(message)
       setIsModalOpen(true)
     } catch (e) {
       const err = e as Error
@@ -85,13 +77,13 @@ const CreateArticle = (): React.JSX.Element => {
           <div className="bg-white p-12 rounded shadow-lg max-w-xl w-full">
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label htmlFor="articleTitle" className="block text-gray-700 font-bold mb-2">
+                <label htmlFor="title" className="block text-gray-700 font-bold mb-2">
                   Título
                 </label>
                 <input
                   type="text"
-                  id="articleTitle"
-                  name="articleTitle"
+                  id="title"
+                  name="title"
                   className="border p-2 w-full"
                   defaultValue={formData.title}
                   onChange={handleChange}
@@ -99,13 +91,13 @@ const CreateArticle = (): React.JSX.Element => {
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="articleLink" className="block text-gray-700 font-bold mb-2">
+                <label htmlFor="link" className="block text-gray-700 font-bold mb-2">
                   Link/Endereço
                 </label>
                 <input
                   type="url"
-                  id="articleLink"
-                  name="articleLink"
+                  id="link"
+                  name="link"
                   className="border p-2 w-full"
                   defaultValue={formData.link}
                   onChange={handleChange}
@@ -113,12 +105,12 @@ const CreateArticle = (): React.JSX.Element => {
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="articleResume" className="block text-gray-700 font-bold mb-2">
+                <label htmlFor="resume" className="block text-gray-700 font-bold mb-2">
                   Resumo do artigo
                 </label>
                 <textarea
-                  id="articleResume"
-                  name="articleResume"
+                  id="resume"
+                  name="resume"
                   className="border p-2 w-full h-44 resize-none"
                   defaultValue={formData.resume}
                   onChange={handleChange}

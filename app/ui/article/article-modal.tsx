@@ -2,11 +2,10 @@
 
 import React, { useEffect, useState } from 'react'
 import Spinner from '@/app/ui/Spinner'
-import { type Article } from '@prisma/client'
-import { updateArticle, validateUpdateArticle } from '@/app/lib/Article'
+import { type IArticleData, updateArticle } from '@/app/lib/Article'
 
 interface IArticleModal {
-  article?: Partial<Article>
+  article?: Partial<IArticleData>
   isUpdating?: boolean
   modalResponse: (success: boolean) => void
   closeModal: (isOpen: boolean) => void
@@ -18,7 +17,7 @@ const ArticleModal = ({ article, modalResponse, isUpdating, closeModal }: IArtic
     link: '',
     resume: ''
   })
-  const [actualFormData, setActualFormData] = useState<Partial<Article> | undefined>()
+  const [actualFormData, setActualFormData] = useState<Partial<IArticleData> | undefined>()
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
@@ -32,7 +31,7 @@ const ArticleModal = ({ article, modalResponse, isUpdating, closeModal }: IArtic
       setIsLoading(true)
       const form = new FormData()
 
-      if (actualFormData !== undefined && actualFormData.id !== 0) {
+      if (actualFormData !== undefined && actualFormData.id !== '') {
         form.append('id', actualFormData.id as unknown as string)
       }
 
@@ -40,13 +39,11 @@ const ArticleModal = ({ article, modalResponse, isUpdating, closeModal }: IArtic
       form.append('link', formData.link)
       form.append('resume', formData.resume)
 
-      const { error, message } = validateUpdateArticle(form)
+      const { error, message } = await updateArticle(form)
 
       if (error) {
-        throw new Error(JSON.stringify(message))
+        throw new Error(message)
       }
-
-      await updateArticle(form)
 
       modalResponse(true)
       setIsLoading(false)

@@ -4,10 +4,9 @@ import React, { useState } from 'react'
 import ArticleModal from '@/app/ui/article/article-modal'
 import DeleteModal from '@/app/ui/delete-modal'
 import FeedbackModal from '@/app/ui/feedback-modal'
-import { type Article } from '@prisma/client'
-import { deleteArticle } from '@/app/lib/Article'
+import { deleteArticle, type IArticleData } from '@/app/lib/Article'
 
-interface IArticle extends Article {
+interface IArticle extends IArticleData {
   isUpdating: boolean
 }
 
@@ -22,7 +21,7 @@ const ArticleCard = ({
   const [deleteModal, setDeleteModal] = useState<boolean>(false)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
 
-  const handleDeleteArticle = (id: number): boolean => {
+  const handleDeleteArticle = (id: string): boolean => {
     try {
       void (async () => {
         await deleteArticle(id)
@@ -44,7 +43,9 @@ const ArticleCard = ({
           {title}
         </p>
         <p className="text-base text-gray-500">{link}</p>
-        <p className="text-base text-gray-500">{resume}</p>
+        <p style={{
+          wordBreak: 'break-word'
+        }} className="text-base text-gray-500">{resume}</p>
       </div>
       {isUpdating && (
         <div className="flex justify-around items-center mt-4">

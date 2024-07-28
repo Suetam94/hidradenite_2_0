@@ -1,5 +1,9 @@
 import React from 'react'
-import { type IConfirmationModal } from '@/app/lib/interfaces'
+
+export interface IConfirmationModal {
+  isOpen: boolean
+  onSave: (answer: boolean) => Promise<void>
+}
 
 const ConfirmationModal = ({ isOpen, onSave }: IConfirmationModal): React.JSX.Element | null => {
   if (!isOpen) {

@@ -2,15 +2,15 @@
 
 import React, { useEffect, useState } from 'react'
 import { Img } from 'react-image'
-import { type IDashboardImageForm } from '@/app/lib/interfaces'
-import {
-  getMediaBufferAndManage,
-  getPageContentMediaByPageTitle
-} from '@/app/lib/PageContent'
 import FeedbackModal from '@/app/ui/feedback-modal'
 import Spinner from '@/app/ui/Spinner'
+import { getBannerImage, saveBannerImage } from '@/app/lib/PageConfig'
 
-const DashboardFormImage = ({ page, contentId, formTitle }: IDashboardImageForm): React.JSX.Element => {
+export interface IDashboardImageForm {
+  formTitle: string
+}
+
+const DashboardFormImage = ({ formTitle }: IDashboardImageForm): React.JSX.Element => {
   const [image, setImage] = useState<string | null>(null)
   const [file, setFile] = useState<File | null>(null)
   const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -20,8 +20,16 @@ const DashboardFormImage = ({ page, contentId, formTitle }: IDashboardImageForm)
 
   const getPageContentMedia = async (): Promise<void> => {
     try {
-      const mediaContent = await getPageContentMediaByPageTitle(page, contentId)
-      setImage(mediaContent)
+      const { error, message, data } = await getBannerImage()
+
+      if (error) {
+        throw new Error(message)
+      }
+
+      if (data !== undefined) {
+        const { imageUrl } = data
+        setImage(imageUrl ?? null)
+      }
     } catch (e) {
       const error = e as Error
       console.error(`Error: ${error.message}`)
@@ -73,13 +81,16 @@ const DashboardFormImage = ({ page, contentId, formTitle }: IDashboardImageForm)
 
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('page', page)
-      formData.append('contentId', contentId)
 
       setIsUploading(true)
-      await getMediaBufferAndManage(formData)
+      const { error, message } = await saveBannerImage(formData)
+
+      if (error) {
+        throw new Error(message)
+      }
+
       setIsUploading(false)
-      setModalTitle('Imagem salva com sucesso!')
+      setModalTitle(message)
       setIsOpen(true)
     } catch (e) {
       const error = e as Error

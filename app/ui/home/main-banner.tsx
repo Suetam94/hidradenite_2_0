@@ -1,9 +1,11 @@
 import React from 'react'
-import { getPageContentByPageTitle, getPageContentMediaByPageTitle } from '@/app/lib/PageContent'
+import { getBannerImage, getTextContent } from '@/app/lib/PageConfig'
 
 const MainBanner = async (): Promise<React.JSX.Element> => {
-  const mainBanner = await getPageContentMediaByPageTitle('home', 'main-banner-image')
-  const mainBannerText = await getPageContentByPageTitle('home', 'main-banner-text')
+  const { data: bannerData } = await getBannerImage()
+  const { data: bannerTextData } = await getTextContent('main-banner-text')
+  const mainBanner = bannerData?.imageUrl
+  const mainBannerText = bannerTextData?.textContent
 
   return (
     <div style={{
@@ -12,7 +14,7 @@ const MainBanner = async (): Promise<React.JSX.Element> => {
       <div className="w-full max-w-7xl flex items-center justify-center xl:items-end xl:justify-start">
         <h3 style={{
           color: mainBannerText?.color ?? '#FFF'
-        }} className="mb-5 text-2xl lg:text-4xl xl:text-5xl font-bold">{mainBannerText?.textContent}</h3>
+        }} className="mb-5 text-2xl lg:text-4xl xl:text-5xl font-bold">{mainBannerText?.text}</h3>
       </div>
     </div>
   )

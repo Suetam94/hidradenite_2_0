@@ -2,36 +2,32 @@
 
 import React, { useEffect, useState } from 'react'
 import { SketchPicker, type ColorResult } from 'react-color'
-import { type IColorPicker, type IPageContentText } from '@/app/lib/interfaces'
-import { getPageContentByPageTitle, pageContent } from '@/app/lib/PageContent'
 import FeedbackModal from '@/app/ui/feedback-modal'
 import Spinner from '@/app/ui/Spinner'
+import { getGeneralColor, saveGeneralColor } from '@/app/lib/PageConfig'
+
+export interface IColorPicker {
+  title: string
+}
 
 const ColorPicker = ({
-  title,
-  page,
-  contentId
+  title
 }: IColorPicker): React.JSX.Element => {
-  const [initialColor, setInitialColor] = useState('#FFF')
-  const [color, setColor] = useState(initialColor)
+  const [initialColor, setInitialColor] = useState<string>('#FFF')
+  const [color, setColor] = useState<string>(initialColor)
+  const [modalTitle, setModalTitle] = useState<string>('')
   const [displayColorPicker, setDisplayColorPicker] = useState(false)
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isSending, setIsSending] = useState<boolean>(false)
 
-  const getColorPageContent = async () => {
+  const getColorPageContent = async (): Promise<void> => {
     try {
-      if (page && contentId) {
-        const pageDbContent = await getPageContentByPageTitle(page, contentId)
-        if (pageDbContent !== null) {
-          const {
-            color
-          } = pageDbContent
-          if (color !== null) {
-            setInitialColor(color)
-            setColor(color)
-          }
-        }
+      const { data } = await getGeneralColor()
+      if (data !== undefined) {
+        const { color } = data
+        setInitialColor(color ?? initialColor)
+        setColor(color ?? initialColor)
       }
     } catch (error) {
       console.error('Erro ao obter conteúdo da página:', error)
@@ -39,7 +35,7 @@ const ColorPicker = ({
   }
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       setIsLoading(true)
       await getColorPageContent()
       setIsLoading(false)
@@ -63,21 +59,23 @@ const ColorPicker = ({
     setColor(initialColor)
   }
 
-  const handleSaveColor = async () => {
-    const updateColor: IPageContentText = {
-      page,
-      contentId,
-      color
-    }
-
+  const handleSaveColor = async (): Promise<void> => {
     try {
       setIsSending(true)
-      await pageContent(updateColor, 'text')
+      const { error, message } = await saveGeneralColor(color)
+
+      if (error) {
+        throw new Error(message)
+      }
+
       setIsSending(false)
+      setModalTitle(message)
       setIsOpen(true)
       console.log('Color saved successfully.')
     } catch (error) {
       console.error('Failed to save color:', error)
+      setModalTitle((error as Error).message)
+      setIsOpen(true)
     }
   }
 
@@ -124,7 +122,7 @@ const ColorPicker = ({
                 isSending ? <Spinner /> : 'Resetar cor'
               }
             </button>
-            <button onClick={handleSaveColor} type="submit"
+            <button onClick={() => handleSaveColor} type="submit"
                     className="bg-[#FFA500] min-w-20 text-center text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none">
               {
                 isSending ? <Spinner /> : 'Salvar'
@@ -133,7 +131,7 @@ const ColorPicker = ({
           </div>
         }
       </div>
-      <FeedbackModal isOpen={isOpen} onClose={setIsOpen} title="A cor foi salva com sucesso!" />
+      <FeedbackModal isOpen={isOpen} onClose={setIsOpen} title={modalTitle} />
     </div>
   )
 }
