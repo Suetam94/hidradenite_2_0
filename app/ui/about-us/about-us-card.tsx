@@ -12,6 +12,7 @@ export interface IAboutUs {
   content?: string
   imageString?: string
   isUpdating?: boolean
+  onDataChanged: () => void
 }
 
 const AboutUsCard = ({
@@ -19,24 +20,33 @@ const AboutUsCard = ({
   title,
   content,
   imageString,
-  isUpdating = false
+  isUpdating = false,
+  onDataChanged
 }: IAboutUs): React.JSX.Element => {
-  const [modalResponse, setModalResponse] = useState<boolean>()
+  const [modalResponse, setModalResponse] = useState<boolean | null>(null)
   const [deleteModal, setDeleteModal] = useState<boolean>(false)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [imgSrc, setImgSrc] = useState(imageString)
   const [isValid, setIsValid] = useState(true)
+  const [feedbackMessage, setFeedbackMessage] = useState<string>('Oops! Algo deu errado, tente novamente!')
 
-  const handleDeleteAboutUs = (id: string): boolean => {
+  const handleDeleteAboutUs = (id: string): void => {
     try {
-      void (async () => {
-        await deleteAboutUs(id)
-      })()
-      return true
+      void deleteAboutUs(id)
+      setFeedbackMessage('Registro excluído com sucesso')
+      onDataChanged()
+      setModalResponse(true)
     } catch (e) {
-      console.log(e)
-      return false
+      console.error(e)
+      setFeedbackMessage('Algo deu errado, por favor, tente novamente.')
+      setModalResponse(false)
     }
+  }
+
+  const closeFeedbackModal = (): void => {
+    setModalResponse(null)
+    setFeedbackMessage('Oops! Algo deu errado, tente novamente!')
+    onDataChanged()
   }
 
   useEffect((): void => {
@@ -99,23 +109,22 @@ const AboutUsCard = ({
           modalResponse={setModalResponse}
           closeModal={setIsModalOpen}
           isUpdating={isUpdating}
+          setFeedbackMessage={setFeedbackMessage}
         />
       )}
       {id !== undefined && (
-        <DeleteModal isOpen={deleteModal} closeModal={setDeleteModal} deleteAction={handleDeleteAboutUs} param={id} />
-      )}
-      {modalResponse === false && isModalOpen && modalResponse !== undefined && (
-        <FeedbackModal
-          isOpen={!modalResponse}
-          onClose={setModalResponse}
-          title={'Algo deu errado, por favor, tente novamente.'}
+        <DeleteModal
+          isOpen={deleteModal}
+          closeModal={setDeleteModal}
+          deleteAction={handleDeleteAboutUs}
+          param={id}
         />
       )}
-      {modalResponse === true && modalResponse !== undefined && (
+      {modalResponse !== null && (
         <FeedbackModal
-          isOpen={modalResponse as boolean}
-          onClose={setModalResponse}
-          title={'Registro deletado com sucesso'}
+          isOpen={true}
+          onClose={closeFeedbackModal}
+          title={feedbackMessage ?? ''}
         />
       )}
     </div>

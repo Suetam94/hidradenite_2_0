@@ -90,11 +90,14 @@ export async function readAboutUs (): Promise<IAboutUsData[]> {
 
 export async function updateAboutUs (formData: FormData): Promise<IReturn> {
   const id = formData.get('id') as string
-  const title = formData.get('title') as string
-  const content = formData.get('content') as string
+  const title = formData.get('title') as string | null
+  const content = formData.get('content') as string | null
   const mediaFile = formData.get('media') as File | null
 
-  const validationResult = await validateSchema(updateAboutUsSchema, { title, content, mediaFile })
+  const data = { id, title, content, mediaFile }
+  const sanitizedData = Object.fromEntries(Object.entries(data).filter(([_, v]) => v != null))
+
+  const validationResult = await validateSchema(updateAboutUsSchema, sanitizedData)
   if (validationResult != null) return validationResult
 
   try {
@@ -103,12 +106,14 @@ export async function updateAboutUs (formData: FormData): Promise<IReturn> {
       mediaURL = await uploadMedia(mediaFile)
     }
 
+    delete sanitizedData.mediaFile
+
+    if (mediaURL !== '') {
+      sanitizedData.mediaURL = mediaURL
+    }
+
     const docRef = doc(db, 'aboutUs', id)
-    await updateDoc(docRef, {
-      title,
-      content,
-      ...((mediaURL !== '') && { mediaURL })
-    })
+    await updateDoc(docRef, sanitizedData)
 
     return {
       error: false,

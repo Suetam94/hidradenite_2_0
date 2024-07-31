@@ -18,15 +18,15 @@ const Page = (): React.JSX.Element => {
     void fetchCommonQuestion()
   }, [fetchCommonQuestion])
 
-  const handleCommonQuestionCreated = (): void => {
+  const handleDataChanged = (): void => {
     void fetchCommonQuestion()
   }
 
   return (
     <ProtectedRoute>
       <h2 className="text-xl font-bold mb-4 text-base-blue">Editando perguntas frequentes</h2>
-      <CreateCommonQuestion onCreate={handleCommonQuestionCreated} />
-      <ShowCommonQuestion commonQuestions={commonQuestions} />
+      <CreateCommonQuestion onCreate={handleDataChanged} />
+      <ShowCommonQuestion onDataChanged={handleDataChanged} commonQuestions={commonQuestions} />
     </ProtectedRoute>
   )
 }

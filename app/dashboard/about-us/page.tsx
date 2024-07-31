@@ -18,15 +18,15 @@ const Page = (): React.JSX.Element => {
     void fetchAboutUs()
   }, [fetchAboutUs])
 
-  const handleAboutUsCreated = (): void => {
+  const handleDataChanged = (): void => {
     void fetchAboutUs()
   }
 
   return (
     <ProtectedRoute>
       <h2 className="text-xl font-bold mb-4 text-base-blue">Editando sobre nós</h2>
-      <CreateAboutUs onCreate={handleAboutUsCreated} />
-      <ShowAboutUs aboutUs={aboutUs} />
+      <CreateAboutUs onCreate={handleDataChanged} />
+      <ShowAboutUs onDataChanged={handleDataChanged} aboutUs={aboutUs} />
     </ProtectedRoute>
   )
 }

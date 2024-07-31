@@ -89,7 +89,7 @@ const CreateAboutUs = ({ onCreate }: ICreateAboutUsProps): React.JSX.Element => 
       </button>
       {modalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
-          <div className="bg-white p-8 rounded shadow-lg">
+          <div className="bg-white p-12 rounded shadow-lg max-w-xl w-full">
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label htmlFor="title" className="block text-gray-700 font-bold mb-2">
@@ -123,13 +123,7 @@ const CreateAboutUs = ({ onCreate }: ICreateAboutUsProps): React.JSX.Element => 
                 <label htmlFor="media" className="block text-gray-700 font-bold mb-2">
                   Imagem
                 </label>
-                <input
-                  type="file"
-                  id="media"
-                  name="media"
-                  className="border p-2 w-full"
-                  onChange={handleImageChange}
-                />
+                <input type="file" id="media" name="media" className="border p-2 w-full" onChange={handleImageChange} />
               </div>
               <div className="text-center mb-4">
                 <button

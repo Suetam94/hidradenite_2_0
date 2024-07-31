@@ -84,18 +84,19 @@ export async function readCommonQuestions (): Promise<ICommonQuestionData[]> {
 
 export async function updateCommonQuestion (formData: FormData): Promise<IReturn> {
   const id = formData.get('id') as string
-  const question = formData.get('question') as string
-  const answer = formData.get('answer') as string
+  const question = formData.get('question') as string | null
+  const answer = formData.get('answer') as string | null
 
-  const validationResult = await validateSchema(updateCommonQuestionSchema, { question, answer })
+  const data = { id, question, answer }
+
+  const sanitizedData = Object.fromEntries(Object.entries(data).filter(([_, v]) => v != null))
+
+  const validationResult = await validateSchema(updateCommonQuestionSchema, sanitizedData)
   if (validationResult != null) return validationResult
 
   try {
     const docRef = doc(db, 'commonQuestion', id)
-    await updateDoc(docRef, {
-      question,
-      answer
-    })
+    await updateDoc(docRef, sanitizedData)
 
     return {
       error: false,

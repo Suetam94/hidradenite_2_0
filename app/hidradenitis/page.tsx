@@ -6,29 +6,34 @@ export default async function Hidradenitis (): Promise<React.JSX.Element> {
     <div className="vh-100 flex flex-col justify-between bg-gray-100">
       <main className="h-full">
         <div className="container mx-auto p-4">
-          <div className="bg-white shadow-md rounded-lg p-4 mb-4">
+          <h1 className="text-3xl font-bold mb-8 text-center text-blue-600">O Que é a Hidradenite?</h1>
+          <section className="mb-8">
             <h3 className="text-2xl font-bold mb-2 text-blue-500">O que é a HS?</h3>
-            <p className="text-gray-700 mb-4">
-              A Hidradenite Supurativa (HS) é um doença crônica inflamatória, que costuma apresentar nódulos, abscessos,
-              fístulas e cicatrizes especialmente nas regiões de dobras, mas pode acometer qualquer região que tenha pelos.
+            <p className="text-gray-700">
+              A Hidradenite Supurativa (HS) é uma doença crônica inflamatória, que costuma apresentar nódulos,
+              abscessos,
+              fístulas e cicatrizes especialmente nas regiões de dobras, mas pode acometer qualquer região que tenha
+              pelos.
               O diagnóstico e acompanhamento com seu Dermatologista podem ajudar a enfrentar cada passo diante da HS.
             </p>
-          </div>
-          <div className="bg-white shadow-md rounded-lg p-4 mb-4">
+          </section>
+          <section className="mb-8">
             <h3 className="text-2xl font-bold mb-2 text-blue-500">Diagnóstico</h3>
-            <p className="text-gray-700 mb-4">
-              O Diagnóstico é clínico, ou seja, a avaliação e o exame físico feitos por seu médico Dermatologista fornecem o
+            <p className="text-gray-700">
+              O Diagnóstico é clínico, ou seja, a avaliação e o exame físico feitos por seu médico Dermatologista
+              fornecem o
               diagnóstico correto da doença. Exames de imagem como Ultrassom e Ressonância Magnética podem ajudar a
               classificar a HS.
             </p>
-          </div>
-          <div className="bg-white shadow-md rounded-lg p-4 mb-4">
+          </section>
+          <section className="mb-8">
             <h3 className="text-2xl font-bold mb-2 text-blue-500">Orientações</h3>
-            <p className="text-gray-700 mb-4">
-              O diagnóstico e acompanhamento precoces podem evitar a progressão da doença e melhorar a sua qualidade de vida.
+            <p className="text-gray-700">
+              O diagnóstico e acompanhamento precoces podem evitar a progressão da doença e melhorar a sua qualidade de
+              vida.
               Consulte com seu médico Dermatologista para saber mais.
             </p>
-          </div>
+          </section>
         </div>
       </main>
       <Footer />

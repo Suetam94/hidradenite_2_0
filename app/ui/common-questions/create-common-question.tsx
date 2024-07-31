@@ -10,11 +10,13 @@ interface ICreateCommonQuestionProps {
 }
 
 const CreateCommonQuestion = ({ onCreate }: ICreateCommonQuestionProps): React.JSX.Element => {
-  const [modalOpen, setModalOpen] = useState(false)
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     question: '',
     answer: ''
-  })
+  }
+
+  const [modalOpen, setModalOpen] = useState(false)
+  const [formData, setFormData] = useState(initialFormData)
   const [isLoading, setIsLoading] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('')
@@ -40,6 +42,7 @@ const CreateCommonQuestion = ({ onCreate }: ICreateCommonQuestionProps): React.J
       setIsLoading(false)
 
       setModalTitle(message)
+      setFormData(initialFormData)
       setIsModalOpen(true)
       onCreate()
     } catch (e) {

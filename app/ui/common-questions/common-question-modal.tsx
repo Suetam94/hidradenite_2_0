@@ -3,20 +3,24 @@
 import React, { useEffect, useState } from 'react'
 import Spinner from '@/app/ui/Spinner'
 import { type ICommonQuestionData, updateCommonQuestion } from '@/app/lib/CommonQuestion'
+import { isFormDataEmpty, sanitizeFormData } from '@/app/lib/util'
 
 interface ICommonQuestionModal {
   commonQuestion?: Partial<ICommonQuestionData>
   isUpdating?: boolean
   modalResponse: (success: boolean) => void
   closeModal: (isOpen: boolean) => void
+  setFeedbackMessage?: (message: string) => void
 }
 
-const CommonQuestionModal = ({ commonQuestion, modalResponse, isUpdating, closeModal }: ICommonQuestionModal): React.JSX.Element => {
-  const [formData, setFormData] = useState({
+const CommonQuestionModal = ({ commonQuestion, modalResponse, isUpdating, closeModal, setFeedbackMessage }: ICommonQuestionModal): React.JSX.Element => {
+  const initialFormData = {
     question: '',
     answer: ''
-  })
-  const [actualFormData, setActualFormData] = useState<Partial<ICommonQuestionData> | undefined>()
+  }
+
+  const [formData, setFormData] = useState(initialFormData)
+  const [actualFormData, setActualFormData] = useState<Partial<ICommonQuestionData>>(initialFormData)
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
@@ -30,14 +34,25 @@ const CommonQuestionModal = ({ commonQuestion, modalResponse, isUpdating, closeM
       setIsLoading(true)
       const form = new FormData()
 
-      if (actualFormData !== undefined && actualFormData.id !== '') {
-        form.append('id', actualFormData.id as unknown as string)
-      }
-
       form.append('question', formData.question)
       form.append('answer', formData.answer)
 
-      const { error, message } = await updateCommonQuestion(form)
+      if (actualFormData !== undefined && actualFormData.id !== '' && actualFormData.id !== undefined) {
+        form.append('id', actualFormData.id)
+      }
+
+      const sanitizedForm = sanitizeFormData(form)
+
+      if (isFormDataEmpty(sanitizedForm)) {
+        modalResponse(false)
+        setIsLoading(false)
+        if (setFeedbackMessage != null) {
+          setFeedbackMessage('Por favor, preencha pelo menos um campo.')
+        }
+        return
+      }
+
+      const { error, message } = await updateCommonQuestion(sanitizedForm)
 
       if (error) {
         throw new Error(message)
@@ -45,6 +60,10 @@ const CommonQuestionModal = ({ commonQuestion, modalResponse, isUpdating, closeM
 
       modalResponse(true)
       setIsLoading(false)
+      if (setFeedbackMessage != null) {
+        setFeedbackMessage('Operação realizada com sucesso')
+      }
+      closeModal(false)
     } catch (e) {
       const err = e as Error
       console.log(err)
@@ -68,7 +87,7 @@ const CommonQuestionModal = ({ commonQuestion, modalResponse, isUpdating, closeM
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
-      <div className="bg-white p-8 rounded shadow-lg">
+      <div className="bg-white p-12 rounded shadow-lg max-w-xl w-full">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="question" className="block text-gray-700 font-bold mb-2">

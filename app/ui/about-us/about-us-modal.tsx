@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import Spinner from '@/app/ui/Spinner'
 import { updateAboutUs } from '@/app/lib/AboutUs'
+import { isFormDataEmpty, sanitizeFormData } from '@/app/lib/util'
 
 export interface IAboutUs {
   id?: string
@@ -17,9 +18,10 @@ interface ICommonQuestionModal {
   isUpdating?: boolean
   modalResponse: (success: boolean) => void
   closeModal: (isOpen: boolean) => void
+  setFeedbackMessage?: (message: string) => void
 }
 
-const AboutUsModal = ({ aboutUs, modalResponse, isUpdating, closeModal }: ICommonQuestionModal): React.JSX.Element => {
+const AboutUsModal = ({ aboutUs, modalResponse, isUpdating, closeModal, setFeedbackMessage }: ICommonQuestionModal): React.JSX.Element => {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -39,28 +41,46 @@ const AboutUsModal = ({ aboutUs, modalResponse, isUpdating, closeModal }: ICommo
       setIsLoading(true)
       const form = new FormData()
 
-      if (actualFormData !== undefined && actualFormData.id !== '') {
-        form.append('id', actualFormData.id as unknown as string)
-      }
-
       form.append('title', formData.title)
       form.append('content', formData.content)
       form.append('media', formData.media)
 
-      const { error, message } = await updateAboutUs(form)
+      if (actualFormData !== undefined && actualFormData.id !== '' && actualFormData.id !== undefined) {
+        form.append('id', actualFormData.id)
+      }
+
+      const sanitizedForm = sanitizeFormData(form)
+
+      if (isFormDataEmpty(sanitizedForm)) {
+        modalResponse(false)
+        setIsLoading(false)
+        if (setFeedbackMessage != null) {
+          setFeedbackMessage('Por favor, preencha pelo menos um campo.')
+        }
+        return
+      }
+
+      const { error, message } = await updateAboutUs(sanitizedForm)
 
       if (error) {
         throw new Error(message)
       }
 
       modalResponse(true)
-      closeModal(false)
       setIsLoading(false)
+      if (setFeedbackMessage != null) {
+        setFeedbackMessage('Operação realizada com sucesso')
+      }
+      closeModal(false)
     } catch (e) {
       const err = e as Error
-      console.log(err)
+      console.error(err)
       modalResponse(false)
       setIsLoading(false)
+      if (setFeedbackMessage != null) {
+        setFeedbackMessage(err.message)
+      }
+      closeModal(false)
     }
   }
 
@@ -89,7 +109,7 @@ const AboutUsModal = ({ aboutUs, modalResponse, isUpdating, closeModal }: ICommo
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
-      <div className="bg-white p-8 rounded shadow-lg">
+      <div className="bg-white p-12 rounded shadow-lg max-w-xl w-full">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="title" className="block text-gray-700 font-bold mb-2">
@@ -143,7 +163,9 @@ const AboutUsModal = ({ aboutUs, modalResponse, isUpdating, closeModal }: ICommo
           <div className="flex items-center justify-center text-center">
             <button
               className="bg-gray-600 flex justify-center hover:bg-gray-300 text-white font-bold py-2 px-4 rounded"
-              onClick={() => { closeModal(false) }}
+              onClick={() => {
+                closeModal(false)
+              }}
             >
               {isLoading ? <Spinner /> : 'Fechar'}
             </button>
