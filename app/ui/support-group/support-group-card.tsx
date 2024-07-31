@@ -34,7 +34,7 @@ const SupportGroupCard = ({
     try {
       void deleteSupportGroup(id)
       setFeedbackMessage('Registro excluído com sucesso')
-      if (onDataChanged) {
+      if (onDataChanged != null) {
         onDataChanged()
       }
       setModalResponse(true)
@@ -48,7 +48,7 @@ const SupportGroupCard = ({
   const closeFeedbackModal = (): void => {
     setModalResponse(null)
     setFeedbackMessage('Oops! Algo deu errado, tente novamente!')
-    if (onDataChanged) {
+    if (onDataChanged != null) {
       onDataChanged()
     }
   }
