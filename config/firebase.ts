@@ -18,13 +18,6 @@ const db = getFirestore(app)
 const storage = getStorage(app)
 const auth = getAuth(app)
 
-// Configurar a persistência da autenticação
-setPersistence(auth, browserLocalPersistence)
-  .then(() => {
-    console.log('Autenticação configurada para persistência local')
-  })
-  .catch((error) => {
-    console.error('Erro ao configurar a persistência da autenticação:', error)
-  })
+void setPersistence(auth, browserLocalPersistence)
 
 export { db, storage, auth }

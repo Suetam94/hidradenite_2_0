@@ -13,7 +13,7 @@ interface ISupportGroupCard {
   location: string
   imageString: string
   isUpdating: boolean
-  onDataChanged: () => void
+  onDataChanged?: () => void
 }
 
 const SupportGroupCard = ({
@@ -34,7 +34,9 @@ const SupportGroupCard = ({
     try {
       void deleteSupportGroup(id)
       setFeedbackMessage('Registro excluído com sucesso')
-      onDataChanged()
+      if (onDataChanged) {
+        onDataChanged()
+      }
       setModalResponse(true)
     } catch (e) {
       console.error(e)
@@ -46,7 +48,9 @@ const SupportGroupCard = ({
   const closeFeedbackModal = (): void => {
     setModalResponse(null)
     setFeedbackMessage('Oops! Algo deu errado, tente novamente!')
-    onDataChanged()
+    if (onDataChanged) {
+      onDataChanged()
+    }
   }
 
   return (
