@@ -95,27 +95,32 @@ export async function readSupportGroup (): Promise<ISupportGroupData[]> {
 
 export async function updateSupportGroup (formData: FormData): Promise<IReturn> {
   const id = formData.get('id') as string
-  const eventDate = formData.get('eventDate') as string
-  const location = formData.get('location') as string
-  const eventTime = formData.get('eventTime') as string
+  const eventDate = formData.get('eventDate') as string | null
+  const location = formData.get('location') as string | null
+  const eventTime = formData.get('eventTime') as string | null
   const image = formData.get('image') as File | null
 
-  const validationResult = await validateSchema(updateSupportGroupSchema, { id, eventDate, location, eventTime, image })
+  const data = { id, eventDate, location, eventTime, image }
+
+  const sanitizedData = Object.fromEntries(Object.entries(data).filter(([_, v]) => v != null))
+
+  const validationResult = await validateSchema(updateSupportGroupSchema, sanitizedData)
   if (validationResult != null) return validationResult
 
   try {
     let mediaURL = ''
-    if (image != null) {
+    if (sanitizedData.image != null) {
       mediaURL = await uploadMedia(image, 'supportGroupMedia')
     }
 
+    delete sanitizedData.image
+
+    if (mediaURL !== '') {
+      sanitizedData.mediaURL = mediaURL
+    }
+
     const docRef = doc(db, 'supportGroup', id)
-    await updateDoc(docRef, {
-      eventDate,
-      location,
-      eventTime,
-      ...((mediaURL !== '') && { mediaURL })
-    })
+    await updateDoc(docRef, { ...sanitizedData })
 
     return {
       error: false,

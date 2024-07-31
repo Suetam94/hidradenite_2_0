@@ -3,22 +3,28 @@
 import React, { useEffect, useState } from 'react'
 import Spinner from '@/app/ui/Spinner'
 import { type ISupportGroupData, updateSupportGroup } from '@/app/lib/SupportGroup'
+import { isFormDataEmpty, sanitizeFormData } from '@/app/lib/util'
 
 interface ISupportGroupModal {
   supportGroup?: Partial<ISupportGroupData>
   isUpdating?: boolean
   modalResponse: (success: boolean) => void
   closeModal: (isOpen: boolean) => void
+  setFeedbackMessage?: (message: string) => void
 }
 
-const SupportGroupModal = ({ supportGroup, modalResponse, isUpdating, closeModal }: ISupportGroupModal): React.JSX.Element => {
+const SupportGroupModal = ({ supportGroup, modalResponse, isUpdating, closeModal, setFeedbackMessage }: ISupportGroupModal): React.JSX.Element => {
   const [formData, setFormData] = useState({
     eventDate: '',
     location: '',
     eventTime: '',
     image: '' as unknown as File
   })
-  const [actualFormData, setActualFormData] = useState<Partial<ISupportGroupData> | undefined>()
+  const [actualFormData, setActualFormData] = useState<Partial<ISupportGroupData>>({
+    eventDate: '',
+    location: '',
+    eventTime: ''
+  })
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
@@ -32,16 +38,27 @@ const SupportGroupModal = ({ supportGroup, modalResponse, isUpdating, closeModal
       setIsLoading(true)
       const form = new FormData()
 
-      if (actualFormData !== undefined && actualFormData.id !== '') {
-        form.append('id', actualFormData.id as unknown as string)
-      }
-
       form.append('eventDate', formData.eventDate)
       form.append('location', formData.location)
       form.append('eventTime', formData.eventTime)
       form.append('image', formData.image)
 
-      const { error, message } = await updateSupportGroup(form)
+      if (actualFormData !== undefined && actualFormData.id !== '' && actualFormData.id !== undefined) {
+        form.append('id', actualFormData.id)
+      }
+
+      const sanitizedForm = sanitizeFormData(form)
+
+      if (isFormDataEmpty(sanitizedForm)) {
+        modalResponse(false)
+        setIsLoading(false)
+        if (setFeedbackMessage != null) {
+          setFeedbackMessage('Por favor, preencha pelo menos um campo.')
+        }
+        return
+      }
+
+      const { error, message } = await updateSupportGroup(sanitizedForm)
 
       if (error) {
         throw new Error(message)
@@ -49,11 +66,19 @@ const SupportGroupModal = ({ supportGroup, modalResponse, isUpdating, closeModal
 
       modalResponse(true)
       setIsLoading(false)
+      if (setFeedbackMessage != null) {
+        setFeedbackMessage('Operação realizada com sucesso')
+      }
+      closeModal(false)
     } catch (e) {
       const err = e as Error
-      console.log(err)
+      console.error(err)
       modalResponse(false)
       setIsLoading(false)
+      if (setFeedbackMessage != null) {
+        setFeedbackMessage(err.message)
+      }
+      closeModal(false)
     }
   }
 

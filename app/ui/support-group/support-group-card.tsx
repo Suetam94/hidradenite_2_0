@@ -13,6 +13,7 @@ interface ISupportGroupCard {
   location: string
   imageString: string
   isUpdating: boolean
+  onDataChanged: () => void
 }
 
 const SupportGroupCard = ({
@@ -21,22 +22,31 @@ const SupportGroupCard = ({
   eventDate,
   location,
   imageString,
-  isUpdating = false
+  isUpdating = false,
+  onDataChanged
 }: ISupportGroupCard): React.JSX.Element => {
-  const [modalResponse, setModalResponse] = useState<boolean>()
+  const [modalResponse, setModalResponse] = useState<boolean | null>(null)
   const [deleteModal, setDeleteModal] = useState<boolean>(false)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [feedbackMessage, setFeedbackMessage] = useState<string>('Oops! Algo deu errado, tente novamente!')
 
-  const handleDeleteSupportGroup = (id: string): boolean => {
+  const handleDeleteSupportGroup = (id: string): void => {
     try {
-      void (async () => {
-        await deleteSupportGroup(id)
-      })()
-      return true
+      void deleteSupportGroup(id)
+      setFeedbackMessage('Registro excluído com sucesso')
+      onDataChanged()
+      setModalResponse(true)
     } catch (e) {
-      console.log(e)
-      return false
+      console.error(e)
+      setFeedbackMessage('Algo deu errado, por favor, tente novamente.')
+      setModalResponse(false)
     }
+  }
+
+  const closeFeedbackModal = (): void => {
+    setModalResponse(null)
+    setFeedbackMessage('Oops! Algo deu errado, tente novamente!')
+    onDataChanged()
   }
 
   return (
@@ -77,6 +87,7 @@ const SupportGroupCard = ({
           modalResponse={setModalResponse}
           closeModal={setIsModalOpen}
           isUpdating={isUpdating}
+          setFeedbackMessage={setFeedbackMessage}
         />
       )}
       {id !== undefined && (
@@ -87,21 +98,13 @@ const SupportGroupCard = ({
           param={id}
         />
       )}
-      {modalResponse === false && modalResponse !== undefined
-        ? (
+      {modalResponse !== null && (
         <FeedbackModal
-          isOpen={!modalResponse}
-          onClose={setModalResponse}
-          title={'Algo deu errado, por favor, tente novamente.'}
+          isOpen={true}
+          onClose={closeFeedbackModal}
+          title={feedbackMessage ?? ''}
         />
-          )
-        : (
-        <FeedbackModal
-          isOpen={modalResponse as boolean}
-          onClose={setModalResponse}
-          title={'Registro atualizado com sucesso'}
-        />
-          )}
+      )}
     </div>
   )
 }

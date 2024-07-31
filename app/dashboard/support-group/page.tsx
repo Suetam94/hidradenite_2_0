@@ -18,15 +18,15 @@ const Page = (): React.JSX.Element => {
     void fetchSupportGroup()
   }, [fetchSupportGroup])
 
-  const handleSupportGroupCreated = (): void => {
+  const handleDataChanged = (): void => {
     void fetchSupportGroup()
   }
 
   return (
     <ProtectedRoute>
       <h2 className="text-xl font-bold mb-4 text-base-blue">Editando grupos de apoio</h2>
-      <CreateSupportGroup onSupportGroupCreated={handleSupportGroupCreated} />
-      <ShowSupportGroup supportGroups={supportGroup} />
+      <CreateSupportGroup onSupportGroupCreated={handleDataChanged} />
+      <ShowSupportGroup onDataChanged={handleDataChanged} supportGroups={supportGroup} />
     </ProtectedRoute>
   )
 }
