@@ -45,6 +45,8 @@ export async function createCommonQuestion (formData: FormData): Promise<IReturn
   const question = formData.get('question') as string
   const answer = formData.get('answer') as string
 
+  console.log(question)
+
   const validationResult = await validateSchema(createCommonQuestionSchema, { question, answer })
   if (validationResult != null) return validationResult
 

@@ -4,7 +4,7 @@ export const supportGroupSchema = z.object({
   eventDate: z.string().min(1, { message: 'Title is required' }),
   location: z.string().min(1, { message: 'Title is required' }),
   eventTime: z.string().min(1, { message: 'Title is required' }),
-  image: z.instanceof(Buffer, { message: 'Image must be a file' })
+  image: z.instanceof(Blob, { message: 'Image must be a file' })
 })
 
 export const createSupportGroupSchema = supportGroupSchema

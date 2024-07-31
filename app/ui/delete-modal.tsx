@@ -8,7 +8,7 @@ import Spinner from '@/app/ui/Spinner'
 interface IDeleteModal {
   isOpen: boolean
   closeModal: (isOpen: boolean) => void
-  deleteAction: (param: string) => boolean
+  deleteAction: (param: string) => void
   param: string
 }
 
@@ -23,9 +23,10 @@ const DeleteModal = ({ isOpen, closeModal, deleteAction, param }: IDeleteModal):
 
   const handleDelete = (): void => {
     setIsLoading(true)
+    console.log(deleteAction)
     deleteAction(param)
     setIsLoading(false)
-    closeModal(true)
+    closeModal(false)
     router.refresh()
   }
 

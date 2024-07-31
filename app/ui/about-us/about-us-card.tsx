@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import DeleteModal from '@/app/ui/delete-modal'
 import FeedbackModal from '@/app/ui/feedback-modal'
 import AboutUsModal from '@/app/ui/about-us/about-us-modal'
@@ -24,6 +24,8 @@ const AboutUsCard = ({
   const [modalResponse, setModalResponse] = useState<boolean>()
   const [deleteModal, setDeleteModal] = useState<boolean>(false)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [imgSrc, setImgSrc] = useState(imageString)
+  const [isValid, setIsValid] = useState(true)
 
   const handleDeleteAboutUs = (id: string): boolean => {
     try {
@@ -37,14 +39,38 @@ const AboutUsCard = ({
     }
   }
 
+  useEffect((): void => {
+    setImgSrc(imageString)
+    setIsValid(true)
+  }, [imageString])
+
+  const handleError = (): void => {
+    setIsValid(false)
+  }
+
+  const handleLoad = (): void => {
+    setIsValid(true)
+  }
+
   return (
-    <div className="rounded-lg shadow-md bg-white overflow-hidden p-10">
-      {imageString !== undefined ? <img src={imageString} alt="Grupo de apoio" className="w-full h-40 object-fit-contain" /> : <div className="h-40 w-full"></div>}
+    <div className="rounded-lg shadow-md bg-white h-[500px] flex flex-col justify-between overflow-hidden p-10">
+      {imgSrc != null && isValid
+        ? (
+        <img
+          src={imgSrc}
+          alt="Grupo de apoio"
+          onError={handleError}
+          onLoad={handleLoad}
+          className="w-full h-40 object-contain"
+        />
+          )
+        : (
+        <div className="h-40 w-full"></div>
+          )}
       <div className="px-4 py-4">
-        <h3 className="text-2xl font-semibold text-gray-800">Grupo de Apoio</h3>
+        <h3 className="text-2xl font-semibold text-gray-800">{title}</h3>
       </div>
-      <div className="bg-gray-100 px-4 py-2 border-t border-gray-200">
-        <p className="text-base text-gray-500">{title}</p>
+      <div className="bg-gray-100 px-4 py-2 border-t border-gray-200 break-words">
         <p className="text-base text-gray-500">{content}</p>
       </div>
       {isUpdating && (
@@ -85,11 +111,13 @@ const AboutUsCard = ({
           title={'Algo deu errado, por favor, tente novamente.'}
         />
       )}
-      {modalResponse === true && modalResponse !== undefined && <FeedbackModal
-        isOpen={modalResponse as boolean}
-        onClose={setModalResponse}
-        title={'Registro deletado com sucesso'}
-      />}
+      {modalResponse === true && modalResponse !== undefined && (
+        <FeedbackModal
+          isOpen={modalResponse as boolean}
+          onClose={setModalResponse}
+          title={'Registro deletado com sucesso'}
+        />
+      )}
     </div>
   )
 }

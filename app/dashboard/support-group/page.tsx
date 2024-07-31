@@ -1,17 +1,32 @@
-import React from 'react'
-import { readSupportGroup } from '@/app/lib/SupportGroup'
+'use client'
+
+import React, { useCallback, useEffect, useState } from 'react'
+import { type ISupportGroupData, readSupportGroup } from '@/app/lib/SupportGroup'
 import CreateSupportGroup from '@/app/ui/support-group/create-support-group'
 import ShowSupportGroup from '@/app/ui/support-group/show-support-group'
 import ProtectedRoute from '@/app/ui/ProtectedRoute'
 
-const Page = async (): Promise<React.JSX.Element> => {
-  const supportGroups = await readSupportGroup()
+const Page = (): React.JSX.Element => {
+  const [supportGroup, setSupportGroup] = useState<ISupportGroupData[]>([])
+
+  const fetchSupportGroup = useCallback(async () => {
+    const supportGroup = await readSupportGroup()
+    setSupportGroup(supportGroup)
+  }, [])
+
+  useEffect(() => {
+    void fetchSupportGroup()
+  }, [fetchSupportGroup])
+
+  const handleSupportGroupCreated = (): void => {
+    void fetchSupportGroup()
+  }
 
   return (
     <ProtectedRoute>
       <h2 className="text-xl font-bold mb-4 text-base-blue">Editando grupos de apoio</h2>
-      <CreateSupportGroup />
-      <ShowSupportGroup supportGroups={supportGroups} />
+      <CreateSupportGroup onSupportGroupCreated={handleSupportGroupCreated} />
+      <ShowSupportGroup supportGroups={supportGroup} />
     </ProtectedRoute>
   )
 }

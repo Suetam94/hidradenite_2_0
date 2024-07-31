@@ -61,6 +61,7 @@ const ColorPicker = ({
 
   const handleSaveColor = async (): Promise<void> => {
     try {
+      console.log('teste')
       setIsSending(true)
       const { error, message } = await saveGeneralColor(color)
 
@@ -122,7 +123,7 @@ const ColorPicker = ({
                 isSending ? <Spinner /> : 'Resetar cor'
               }
             </button>
-            <button onClick={() => handleSaveColor} type="submit"
+            <button onClick={() => { void handleSaveColor() }} type="button"
                     className="bg-[#FFA500] min-w-20 text-center text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none">
               {
                 isSending ? <Spinner /> : 'Salvar'

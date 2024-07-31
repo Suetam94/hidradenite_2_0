@@ -9,9 +9,16 @@ interface IArticleModal {
   isUpdating?: boolean
   modalResponse: (success: boolean) => void
   closeModal: (isOpen: boolean) => void
+  setFeedbackMessage?: (message: string) => void
 }
 
-const ArticleModal = ({ article, modalResponse, isUpdating, closeModal }: IArticleModal): React.JSX.Element => {
+const ArticleModal: React.FC<IArticleModal> = ({
+  article,
+  modalResponse,
+  isUpdating,
+  closeModal,
+  setFeedbackMessage
+}) => {
   const [formData, setFormData] = useState({
     title: '',
     link: '',
@@ -23,23 +30,54 @@ const ArticleModal = ({ article, modalResponse, isUpdating, closeModal }: IArtic
   useEffect(() => {
     if (article !== undefined) {
       setActualFormData({ ...article })
+      setFormData({
+        title: article.title ?? '',
+        link: article.link ?? '',
+        resume: article.resume ?? ''
+      })
     }
   }, [article])
+
+  const isFormDataEmpty = (formData: FormData): boolean => {
+    const formObject = Object.fromEntries(formData.entries())
+    return Object.values(formObject).every(value => value === '')
+  }
+
+  const sanitizeFormData = (formData: FormData): FormData => {
+    const sanitizedForm = new FormData()
+    formData.forEach((value, key) => {
+      if (value !== '') {
+        sanitizedForm.append(key, value)
+      }
+    })
+    return sanitizedForm
+  }
 
   const handleUpdateArticle = async (): Promise<void> => {
     try {
       setIsLoading(true)
       const form = new FormData()
 
-      if (actualFormData !== undefined && actualFormData.id !== '') {
-        form.append('id', actualFormData.id as unknown as string)
-      }
-
       form.append('title', formData.title)
       form.append('link', formData.link)
       form.append('resume', formData.resume)
 
-      const { error, message } = await updateArticle(form)
+      if (actualFormData !== undefined && actualFormData.id !== '' && actualFormData.id !== undefined) {
+        form.append('id', actualFormData.id)
+      }
+
+      const sanitizedForm = sanitizeFormData(form)
+
+      if (isFormDataEmpty(sanitizedForm)) {
+        modalResponse(false)
+        setIsLoading(false)
+        if (setFeedbackMessage != null) {
+          setFeedbackMessage('Por favor, preencha pelo menos um campo.')
+        }
+        return
+      }
+
+      const { error, message } = await updateArticle(sanitizedForm)
 
       if (error) {
         throw new Error(message)
@@ -47,11 +85,19 @@ const ArticleModal = ({ article, modalResponse, isUpdating, closeModal }: IArtic
 
       modalResponse(true)
       setIsLoading(false)
+      if (setFeedbackMessage != null) {
+        setFeedbackMessage('Operação realizada com sucesso')
+      }
+      closeModal(false)
     } catch (e) {
       const err = e as Error
-      console.log(err)
+      console.error(err)
       modalResponse(false)
       setIsLoading(false)
+      if (setFeedbackMessage != null) {
+        setFeedbackMessage(err.message)
+      }
+      closeModal(false)
     }
   }
 
@@ -60,7 +106,7 @@ const ArticleModal = ({ article, modalResponse, isUpdating, closeModal }: IArtic
     void handleUpdateArticle()
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>): void => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const { name, value } = e.target
     setFormData({
       ...formData,
@@ -70,7 +116,7 @@ const ArticleModal = ({ article, modalResponse, isUpdating, closeModal }: IArtic
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
-      <div className="bg-white p-8 rounded shadow-lg">
+      <div className="bg-white p-12 rounded shadow-lg max-w-xl w-full">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="title" className="block text-gray-700 font-bold mb-2">
@@ -81,7 +127,7 @@ const ArticleModal = ({ article, modalResponse, isUpdating, closeModal }: IArtic
               id="title"
               name="title"
               className="border p-2 w-full"
-              value={isUpdating === true && formData.title === '' ? actualFormData?.title : formData.title}
+              value={formData.title}
               onChange={handleChange}
               required={isUpdating === false}
             />
@@ -95,23 +141,22 @@ const ArticleModal = ({ article, modalResponse, isUpdating, closeModal }: IArtic
               id="link"
               name="link"
               className="border p-2 w-full"
-              value={isUpdating === true && formData.link === '' ? actualFormData?.link : formData.link}
+              value={formData.link}
               onChange={handleChange}
               required={isUpdating === false}
             />
           </div>
           <div className="mb-4">
             <label htmlFor="resume" className="block text-gray-700 font-bold mb-2">
-              Link
+              Resumo
             </label>
-            <input
-              type="text"
+            <textarea
               id="resume"
               name="resume"
-              className="border p-2 w-full"
-              value={isUpdating === true && formData.resume === '' ? actualFormData?.resume : formData.resume}
+              className="border p-2 w-full h-44 resize-none"
+              value={formData.resume}
               onChange={handleChange}
-              required={isUpdating === false}
+              required
             />
           </div>
           <div className="text-center flex items-center justify-center mb-4">
@@ -124,6 +169,7 @@ const ArticleModal = ({ article, modalResponse, isUpdating, closeModal }: IArtic
           </div>
           <div className="flex items-center justify-center text-center">
             <button
+              type="button"
               className="bg-gray-600 flex justify-center hover:bg-gray-300 text-white font-bold py-2 px-4 rounded"
               onClick={() => {
                 closeModal(false)

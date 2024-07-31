@@ -10,6 +10,10 @@ const ConfirmationModal = ({ isOpen, onSave }: IConfirmationModal): React.JSX.El
     return null
   }
 
+  const handleAction = (answer: boolean): void => {
+    onSave(answer).catch(err => { console.log(err) })
+  }
+
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
       <div className="fixed inset-0 bg-black opacity-50"></div>
@@ -18,13 +22,13 @@ const ConfirmationModal = ({ isOpen, onSave }: IConfirmationModal): React.JSX.El
         <div className="flex justify-end">
           <button
             className="bg-red-500 text-white px-4 py-2 mr-2 rounded hover:bg-red-600 focus:outline-none"
-            onClick={() => { void onSave(true).then() }}
+            onClick={() => { handleAction(true) }}
           >
             Salvar
           </button>
           <button
             className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 focus:outline-none"
-            onClick={() => { void onSave(false).then() }}
+            onClick={() => { handleAction(false) }}
           >
             Cancelar
           </button>

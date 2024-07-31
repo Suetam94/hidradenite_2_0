@@ -5,7 +5,11 @@ import Spinner from '@/app/ui/Spinner'
 import FeedbackModal from '@/app/ui/feedback-modal'
 import { createArticle } from '@/app/lib/Article'
 
-const CreateArticle = (): React.JSX.Element => {
+interface ICreateArticleProps {
+  onArticleCreated: () => void
+}
+
+const CreateArticle = ({ onArticleCreated }: ICreateArticleProps): React.JSX.Element => {
   const [modalOpen, setModalOpen] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
@@ -39,6 +43,7 @@ const CreateArticle = (): React.JSX.Element => {
 
       setModalTitle(message)
       setIsModalOpen(true)
+      onArticleCreated()
     } catch (e) {
       const err = e as Error
       setIsLoading(false)

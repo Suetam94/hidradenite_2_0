@@ -24,11 +24,14 @@ const LoginForm = (): React.JSX.Element => {
         throw new Error(message)
       }
 
+      console.log('Login successful, redirecting to /dashboard...')
       router.push('/dashboard')
     } catch (e) {
       const err = e as Error
       setModalTitle(err.message)
       setIsModalOpen(true)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -42,17 +45,15 @@ const LoginForm = (): React.JSX.Element => {
       <h2 className="text-2xl font-bold text-center text-gray-800 mb-4">Login</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="username" className="block text-gray-700 font-semibold mb-1">Email</label>
+          <label htmlFor="email" className="block text-gray-700 font-semibold mb-1">Email</label>
           <input
             required
-            type="text"
+            type="email"
             id="email"
             name="email"
             value={email}
-            onChange={(e) => {
-              setEmail(e.target.value)
-            }}
-            placeholder="Digite seu nome de usuário"
+            onChange={(e) => { setEmail(e.target.value) }}
+            placeholder="Digite seu email"
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-400 focus:ring focus:ring-blue-200 px-4 py-2"
           />
         </div>
@@ -64,9 +65,7 @@ const LoginForm = (): React.JSX.Element => {
             id="password"
             name="password"
             value={password}
-            onChange={(e) => {
-              setPassword(e.target.value)
-            }}
+            onChange={(e) => { setPassword(e.target.value) }}
             placeholder="Digite sua senha"
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-400 focus:ring focus:ring-blue-200 px-4 py-2"
           />
@@ -80,7 +79,6 @@ const LoginForm = (): React.JSX.Element => {
       </form>
       <FeedbackModal isOpen={isModalOpen} onClose={setIsModalOpen} title={modalTitle} />
     </div>
-
   )
 }
 

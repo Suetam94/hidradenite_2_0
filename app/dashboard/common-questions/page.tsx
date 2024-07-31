@@ -1,15 +1,31 @@
-import React from 'react'
+'use client'
+
+import React, { useCallback, useEffect, useState } from 'react'
 import CreateCommonQuestion from '@/app/ui/common-questions/create-common-question'
-import { readCommonQuestions } from '@/app/lib/CommonQuestion'
+import { type ICommonQuestionData, readCommonQuestions } from '@/app/lib/CommonQuestion'
 import ShowCommonQuestion from '@/app/ui/common-questions/show-common-question'
 import ProtectedRoute from '@/app/ui/ProtectedRoute'
 
-const Page = async (): Promise<React.JSX.Element> => {
-  const commonQuestions = await readCommonQuestions()
+const Page = (): React.JSX.Element => {
+  const [commonQuestions, setCommonQuestions] = useState<ICommonQuestionData[]>([])
+
+  const fetchCommonQuestion = useCallback(async () => {
+    const commonQuestions = await readCommonQuestions()
+    setCommonQuestions(commonQuestions)
+  }, [])
+
+  useEffect(() => {
+    void fetchCommonQuestion()
+  }, [fetchCommonQuestion])
+
+  const handleCommonQuestionCreated = (): void => {
+    void fetchCommonQuestion()
+  }
+
   return (
     <ProtectedRoute>
       <h2 className="text-xl font-bold mb-4 text-base-blue">Editando perguntas frequentes</h2>
-      <CreateCommonQuestion />
+      <CreateCommonQuestion onCreate={handleCommonQuestionCreated} />
       <ShowCommonQuestion commonQuestions={commonQuestions} />
     </ProtectedRoute>
   )

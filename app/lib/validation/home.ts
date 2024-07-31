@@ -6,10 +6,10 @@ export const hexColorSchema = z.string({ required_error: 'Color must be a string
   message: 'Invalid hex color format'
 })
 
-export const fileSchema = z.instanceof(Buffer, { message: 'Invalid file format' })
+export const fileSchema = z.instanceof(Blob, { message: 'Invalid file format' })
 
 export const textSchema = z.object({
-  text: z.string().min(1, { message: 'Text is required' }),
-  color: hexColorSchema,
-  contentId: z.string().min(1, { message: 'ContentId is required' })
+  text: z.string().min(1, { message: 'Text is required' })
+  // color: hexColorSchema,
+  // contentId: z.string().min(1, { message: 'ContentId is required' })
 })

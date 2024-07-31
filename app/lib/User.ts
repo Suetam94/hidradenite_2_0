@@ -1,6 +1,6 @@
-'use server'
+'use client'
 
-import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'
+import { signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '@/config/firebase'
 import { UserSchema } from '@/app/lib/validation/user'
 
@@ -14,9 +14,6 @@ export interface IReturn {
   message: string
 }
 
-export const authConfig = auth
-export const loginObserver = onAuthStateChanged
-
 export const loginUser = async ({ email, password }: ILogin): Promise<IReturn> => {
   try {
     const validate = UserSchema.safeParse({ email, password })
@@ -28,12 +25,12 @@ export const loginUser = async ({ email, password }: ILogin): Promise<IReturn> =
       }
     }
 
-    await signInWithEmailAndPassword(auth, email, password)
+    const userCredential = await signInWithEmailAndPassword(auth, email, password)
+    const user = userCredential.user
 
-    return {
-      error: false,
-      message: 'Login feito com sucesso!'
-    }
+    localStorage.setItem('user', JSON.stringify(user))
+
+    return { error: false, message: 'Login bem-sucedido' }
   } catch (e) {
     return {
       error: true,

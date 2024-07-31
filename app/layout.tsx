@@ -3,8 +3,8 @@ import { Inter } from 'next/font/google'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './globals.css'
 import Header from '@/app/ui/header'
-import Footer from '@/app/ui/footer'
 import type { Metadata } from 'next'
+import { AuthProvider } from '@/hooks/AuthContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -26,11 +26,13 @@ export default function RootLayout ({
   children: React.ReactNode
 }>): React.JSX.Element {
   return (
-    <html lang="pt-br">
-      <body className={inter.className}>
-        <Header />
-        {children}
-      </body>
-    </html>
+    <AuthProvider>
+      <html lang="pt-br">
+        <body className={inter.className}>
+          <Header />
+          {children}
+        </body>
+      </html>
+    </AuthProvider>
   )
 }

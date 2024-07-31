@@ -93,6 +93,7 @@ const DashboardFormImage = ({ formTitle }: IDashboardImageForm): React.JSX.Eleme
       setModalTitle(message)
       setIsOpen(true)
     } catch (e) {
+      setIsUploading(false)
       const error = e as Error
       console.error('Erro ao salvar imagem:', error.message)
       setModalTitle(`Erro! ${error.message}`)
@@ -160,7 +161,7 @@ const DashboardFormImage = ({ formTitle }: IDashboardImageForm): React.JSX.Eleme
           type="submit"
           disabled={file == null}
           className="bg-[#FFA500] text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none"
-          onClick={() => handleSaveImage}
+          onClick={() => { void handleSaveImage() }}
         >
           {isUploading || isLoading ? <Spinner/> : 'Salvar'}
         </button>

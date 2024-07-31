@@ -1,23 +1,22 @@
 'use client'
 
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import React, { useEffect, type ReactNode } from 'react'
-import { authConfig, loginObserver } from '@/app/lib/User'
+import { useAuth } from '@/hooks/AuthContext'
 
 const ProtectedRoute = ({ children }: { children: ReactNode }): React.JSX.Element => {
+  const { user, loading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    const unsubscribe = loginObserver(authConfig, (user) => {
-      if (user == null) {
-        void router.push('/login')
-      }
-    })
-
-    return () => {
-      unsubscribe()
+    if (!loading && (user == null)) {
+      router.push('/login')
     }
-  }, [router])
+  }, [user, loading, router])
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
 
   return <>{children}</>
 }

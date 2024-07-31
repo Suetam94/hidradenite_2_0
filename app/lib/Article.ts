@@ -1,14 +1,6 @@
 'use server'
 
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  type QuerySnapshot,
-  updateDoc
-} from 'firebase/firestore'
+import { addDoc, collection, deleteDoc, doc, getDocs, type QuerySnapshot, updateDoc } from 'firebase/firestore'
 import { db } from '@/config/firebase'
 import { createArticleSchema, updateArticleSchema } from '@/app/lib/validation/article'
 import type { ZodSchema } from 'zod'
@@ -82,20 +74,21 @@ export async function readArticles (): Promise<IArticleData[]> {
 
 export async function updateArticle (formData: FormData): Promise<IReturn> {
   const id = formData.get('id') as string
-  const title = formData.get('title') as string
-  const link = formData.get('link') as string
-  const resume = formData.get('resume') as string
+  const title = formData.get('title') as string | null
+  const link = formData.get('link') as string | null
+  const resume = formData.get('resume') as string | null
 
-  const validationResult = await validateSchema(updateArticleSchema, { title, link, resume })
+  const data = { id, title, link, resume }
+
+  const sanitizedData = Object.fromEntries(Object.entries(data).filter(([_, v]) => v != null))
+
+  const validationResult = await validateSchema(updateArticleSchema, sanitizedData)
   if (validationResult != null) return validationResult
 
   try {
     const docRef = doc(db, 'article', id)
-    await updateDoc(docRef, {
-      title,
-      link,
-      resume
-    })
+
+    await updateDoc(docRef, sanitizedData)
 
     return {
       error: false,

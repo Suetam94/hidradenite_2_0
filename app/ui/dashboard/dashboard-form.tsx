@@ -57,8 +57,7 @@ const DashboardForm = ({
       if (answer) {
         setIsLoading(true)
         if (textValue !== undefined) {
-          const { error, message } = await saveTextContent(textValue, defaultColor ?? '', contentId)
-
+          const { error, message } = await saveTextContent(textValue, contentId)
           if (error) {
             throw new Error(message)
           }

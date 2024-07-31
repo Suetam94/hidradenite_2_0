@@ -5,7 +5,11 @@ import Spinner from '@/app/ui/Spinner'
 import FeedbackModal from '@/app/ui/feedback-modal'
 import { createCommonQuestion } from '@/app/lib/CommonQuestion'
 
-const CreateCommonQuestion = (): React.JSX.Element => {
+interface ICreateCommonQuestionProps {
+  onCreate: () => void
+}
+
+const CreateCommonQuestion = ({ onCreate }: ICreateCommonQuestionProps): React.JSX.Element => {
   const [modalOpen, setModalOpen] = useState(false)
   const [formData, setFormData] = useState({
     question: '',
@@ -37,6 +41,7 @@ const CreateCommonQuestion = (): React.JSX.Element => {
 
       setModalTitle(message)
       setIsModalOpen(true)
+      onCreate()
     } catch (e) {
       const err = e as Error
       setIsLoading(false)
@@ -81,7 +86,7 @@ const CreateCommonQuestion = (): React.JSX.Element => {
                 <input
                   type="text"
                   id="commonQuestionQuestion"
-                  name="commonQuestionQuestion"
+                  name="question"
                   className="border p-2 w-full"
                   defaultValue={formData.question}
                   onChange={handleChange}
@@ -93,9 +98,9 @@ const CreateCommonQuestion = (): React.JSX.Element => {
                   Resposta
                 </label>
                 <input
-                  type="url"
+                  type="text"
                   id="commonQuestionAnswer"
-                  name="commonQuestionAnswer"
+                  name="answer"
                   className="border p-2 w-full"
                   defaultValue={formData.answer}
                   onChange={handleChange}

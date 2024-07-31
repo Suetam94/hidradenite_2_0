@@ -5,7 +5,11 @@ import { createSupportGroup } from '@/app/lib/SupportGroup'
 import Spinner from '@/app/ui/Spinner'
 import FeedbackModal from '@/app/ui/feedback-modal'
 
-const CreateSupportGroup = (): React.JSX.Element => {
+interface ICreateSupportGroupProps {
+  onSupportGroupCreated: () => void
+}
+
+const CreateSupportGroup = ({ onSupportGroupCreated }: ICreateSupportGroupProps): React.JSX.Element => {
   const [modalOpen, setModalOpen] = useState(false)
   const [formData, setFormData] = useState({
     eventDate: '',
@@ -41,6 +45,7 @@ const CreateSupportGroup = (): React.JSX.Element => {
 
       setModalTitle(message)
       setIsModalOpen(true)
+      onSupportGroupCreated()
     } catch (e) {
       const err = e as Error
       setIsLoading(false)

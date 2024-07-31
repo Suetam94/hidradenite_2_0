@@ -1,3 +1,5 @@
+'use server'
+
 import {
   addDoc,
   collection,
@@ -17,7 +19,6 @@ interface IReturn {
     imageUrl?: string
     textContent?: {
       text: string
-      color: string
     }
   }
 }
@@ -161,9 +162,9 @@ export const getBannerImage = async (): Promise<IReturn> => {
   }
 }
 
-export const saveTextContent = async (text: string, color: string, contentId: string): Promise<IReturn> => {
+export const saveTextContent = async (text: string, contentId: string): Promise<IReturn> => {
   try {
-    const validate = textSchema.safeParse({ text, color, contentId })
+    const validate = textSchema.safeParse({ text, contentId })
 
     if (!validate.success) {
       return {
@@ -178,14 +179,14 @@ export const saveTextContent = async (text: string, color: string, contentId: st
     if (!querySnapshot.empty) {
       const docId = querySnapshot.docs[0].id
       const docRef = doc(db, 'config', docId)
-      await updateDoc(docRef, { text, color })
+      await updateDoc(docRef, { text })
 
       return {
         error: false,
         message: 'Texto atualizado com sucesso.'
       }
     } else {
-      await addDoc(collection(db, 'config'), { text, color, contentId, type: 'text' })
+      await addDoc(collection(db, 'config'), { text, contentId, type: 'text' })
 
       return {
         error: false,
@@ -212,8 +213,7 @@ export const getTextContent = async (contentId: string): Promise<IReturn> => {
         message: 'Texto encontrado com sucesso.',
         data: {
           textContent: {
-            text: textData.text,
-            color: textData.color
+            text: textData.text
           }
         }
       }

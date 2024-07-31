@@ -8,44 +8,63 @@ import { deleteArticle, type IArticleData } from '@/app/lib/Article'
 
 interface IArticle extends IArticleData {
   isUpdating: boolean
+  onDataChanged: () => void
 }
 
-const ArticleCard = ({
+const ArticleCard: React.FC<IArticle> = ({
   id,
   resume,
   title,
   link,
-  isUpdating = false
-}: IArticle): React.JSX.Element => {
-  const [modalResponse, setModalResponse] = useState<boolean>()
+  isUpdating = false,
+  onDataChanged
+}) => {
+  const [modalResponse, setModalResponse] = useState<boolean | null>(null)
   const [deleteModal, setDeleteModal] = useState<boolean>(false)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [feedbackMessage, setFeedbackMessage] = useState<string>('Oops! Algo deu errado, tente novamente!')
 
-  const handleDeleteArticle = (id: string): boolean => {
+  const truncateText = (text: string, maxLength: number): string => {
+    if (text.length <= maxLength) {
+      return text
+    }
+    return text.substring(0, maxLength) + '...'
+  }
+
+  const handleDeleteArticle = (id: string): void => {
     try {
-      void (async () => {
-        await deleteArticle(id)
-      })()
-      return true
+      void deleteArticle(id)
+      setFeedbackMessage('Registro excluído com sucesso')
+      onDataChanged()
+      setModalResponse(true)
     } catch (e) {
-      console.log(e)
-      return false
+      console.error(e)
+      setFeedbackMessage('Algo deu errado, por favor, tente novamente.')
+      setModalResponse(false)
     }
   }
 
+  const closeFeedbackModal = (): void => {
+    setModalResponse(null)
+    setFeedbackMessage('Oops! Algo deu errado, tente novamente!')
+    onDataChanged()
+  }
+
   return (
-    <div className="rounded-lg shadow-md bg-white overflow-hidden p-10">
+    <div className="rounded-lg shadow-md bg-white h-[500px] flex flex-col justify-between overflow-hidden p-10">
       <div className="px-4 py-4">
-        <h3 className="text-2xl font-semibold text-gray-800">Artigo</h3>
+        <h3 className="text-2xl font-semibold text-gray-800">{title}</h3>
       </div>
-      <div className="bg-gray-100 px-4 py-2 border-t border-gray-200">
-        <p className="text-base text-gray-500">
-          {title}
+      <div className="bg-gray-100 px-4 py-2 border-t border-gray-200 break-words">
+        <p className="text-base text-gray-500 mb-1">{link}</p>
+        <p
+          style={{
+            wordBreak: 'break-word'
+          }}
+          className="text-base text-gray-500"
+        >
+          {resume !== null && truncateText(resume, 150)}
         </p>
-        <p className="text-base text-gray-500">{link}</p>
-        <p style={{
-          wordBreak: 'break-word'
-        }} className="text-base text-gray-500">{resume}</p>
       </div>
       {isUpdating && (
         <div className="flex justify-around items-center mt-4">
@@ -73,6 +92,7 @@ const ArticleCard = ({
           modalResponse={setModalResponse}
           closeModal={setIsModalOpen}
           isUpdating={isUpdating}
+          setFeedbackMessage={setFeedbackMessage}
         />
       )}
       {id !== undefined && (
@@ -83,21 +103,13 @@ const ArticleCard = ({
           param={id}
         />
       )}
-      {modalResponse === false && modalResponse !== undefined
-        ? (
+      {modalResponse !== null && (
         <FeedbackModal
-          isOpen={!modalResponse}
-          onClose={setModalResponse}
-          title={'Algo deu errado, por favor, tente novamente.'}
+          isOpen={true}
+          onClose={closeFeedbackModal}
+          title={feedbackMessage ?? ''}
         />
-          )
-        : (
-        <FeedbackModal
-          isOpen={modalResponse as boolean}
-          onClose={setModalResponse}
-          title={'Registro atualizado com sucesso'}
-        />
-          )}
+      )}
     </div>
   )
 }

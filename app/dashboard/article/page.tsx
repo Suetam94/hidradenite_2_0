@@ -1,16 +1,32 @@
-import React from 'react'
+'use client'
+
+import React, { useCallback, useEffect, useState } from 'react'
 import CreateArticle from '@/app/ui/article/create-article'
-import { readArticles } from '@/app/lib/Article'
+import { type IArticleData, readArticles } from '@/app/lib/Article'
 import ShowArticle from '@/app/ui/article/show-article'
 import ProtectedRoute from '@/app/ui/ProtectedRoute'
 
-const Page = async (): Promise<React.JSX.Element> => {
-  const articles = await readArticles()
+const Page = (): React.JSX.Element => {
+  const [articles, setArticles] = useState<IArticleData[]>([])
+
+  const fetchArticles = useCallback(async () => {
+    const articles = await readArticles()
+    setArticles(articles)
+  }, [])
+
+  useEffect(() => {
+    void fetchArticles()
+  }, [fetchArticles])
+
+  const handleDataChanged = (): void => {
+    void fetchArticles()
+  }
+
   return (
     <ProtectedRoute>
       <h2 className="text-xl font-bold mb-4 text-base-blue">Editando artigos</h2>
-      <CreateArticle />
-      <ShowArticle articles={articles} />
+      <CreateArticle onArticleCreated={handleDataChanged} />
+      <ShowArticle onDataChanged={handleDataChanged} articles={articles} />
     </ProtectedRoute>
   )
 }
