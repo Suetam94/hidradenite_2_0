@@ -30,6 +30,11 @@ const SupportGroupCard = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [feedbackMessage, setFeedbackMessage] = useState<string>('Oops! Algo deu errado, tente novamente!')
 
+  const formatDate = (dateString: string): string => {
+    const options: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' }
+    return new Date(dateString).toLocaleDateString('pt-BR', options)
+  }
+
   const handleDeleteSupportGroup = (id: string): void => {
     try {
       void deleteSupportGroup(id)
@@ -57,11 +62,11 @@ const SupportGroupCard = ({
     <div className="rounded-lg shadow-md bg-white overflow-hidden p-10">
       <img src={imageString} alt="Grupo de apoio" className="w-full h-40 object-fit-contain" />
       <div className="px-4 py-4">
-        <h3 className="text-2xl font-semibold text-gray-800">Grupo de Apoio</h3>
+        <h3 className="text-2xl font-semibold text-gray-800">Próximo Grupo de Apoio</h3>
       </div>
       <div className="bg-gray-100 px-4 py-2 border-t border-gray-200">
         <p className="text-base text-gray-500">
-          {eventDate} - {eventTime}
+          {formatDate(eventDate)} - {eventTime}
         </p>
         <p className="text-base text-gray-500">{location}</p>
       </div>
