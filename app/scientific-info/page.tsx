@@ -8,7 +8,7 @@ export default async function ScientificInfo (): Promise<React.JSX.Element> {
 
   return (
     <div className="vh-100 flex flex-column justify-between">
-      <main className="h-full">
+      <main>
         <ArticlesList articles={scientificInfo} />
       </main>
       <Footer />

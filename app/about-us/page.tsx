@@ -22,7 +22,7 @@ export default async function AboutUs (): Promise<React.JSX.Element> {
 
   return (
     <div className="vh-100 flex flex-column justify-between">
-      <main className="h-full">
+      <main>
         <div className="container mx-auto flex justify-content-center items-center flex-col p-4">
           {normalizedAboutUs.map((section) => (
             <div key={section.id} className="bg-white p-4 mb-4 flex flex-col items-center justify-center">
@@ -31,8 +31,8 @@ export default async function AboutUs (): Promise<React.JSX.Element> {
                   <img src={section.mediaURL} alt={section.title} className="rounded-lg shadow-sm" />
                 </div>
               )}
-              <h2 className="text-2xl font-bold mb-2 text-blue-500">{section.title}</h2>
-              <p className="text-gray-700 mb-4">{section.content}</p>
+              <h2 className="text-2xl font-bold mb-2 text-blue-500 text-center">{section.title}</h2>
+              <p className="text-gray-700 mb-4 text-justify">{section.content}</p>
             </div>
           ))}
         </div>

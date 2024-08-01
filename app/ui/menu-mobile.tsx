@@ -9,8 +9,16 @@ import ProfileOptions from '@/app/ui/profile-options'
 const MenuMobile = (): React.JSX.Element => {
   const [show, setShow] = useState(false)
 
-  const handleClose = (): void => { setShow(false) }
-  const handleShow = (): void => { setShow(true) }
+  const handleClose = (): void => {
+    setShow(false)
+  }
+  const handleShow = (): void => {
+    setShow(true)
+  }
+
+  const onLinkClick = (): void => {
+    setShow(false)
+  }
 
   return (
     <div className="block lg:hidden">
@@ -22,9 +30,9 @@ const MenuMobile = (): React.JSX.Element => {
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>Menu</Offcanvas.Title>
         </Offcanvas.Header>
-        <Offcanvas.Body className="relative flex flex-col items-center">
-          <Navbar />
-          <ProfileOptions />
+        <Offcanvas.Body className="relative flex flex-col items-center justify-between">
+          <Navbar isMobile={true} onLinkClicked={onLinkClick} />
+          <ProfileOptions onLinkClicked={onLinkClick} />
         </Offcanvas.Body>
       </Offcanvas>
     </div>

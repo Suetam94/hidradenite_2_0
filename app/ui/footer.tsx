@@ -3,21 +3,17 @@
 import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Browser, InstagramLogo, PaperPlaneTilt, TwitterLogo, YoutubeLogo } from '@phosphor-icons/react'
+import { Browser, InstagramLogo, TwitterLogo, YoutubeLogo } from '@phosphor-icons/react'
+import CreatedBy from '@/app/ui/created-by'
+import OurGroup from '@/app/ui/our-group'
 
 const Footer = (): React.JSX.Element => {
   return (
-    <footer className="w-full h-full bg-base-blue flex justify-center pb-5">
-      <div
-        className="w-full max-w-7xl flex flex-col lg:flex-row justify-center items-center lg:justify-between lg:items-start">
+    <footer className="w-full h-full bg-base-blue flex flex-col items-center">
+      <div className="w-full max-w-7xl flex flex-col lg:flex-row justify-center items-center lg:justify-between lg:items-start">
         <div className="text-white text-sm">
           <Link href="/">
-            <Image
-              src="/new-logo-footer.svg"
-              width={294}
-              height={84}
-              alt="Logotipo hidradenite supurativa brasil"
-            />
+            <Image src="/new-logo-footer.svg" width={294} height={84} alt="Logotipo hidradenite supurativa brasil" />
           </Link>
           <div className="hidden my-6 lg:my-10 lg:block">
             <p>Copyright © {new Date().getFullYear()} Hidradenite Supurativa Brasil</p>
@@ -26,23 +22,27 @@ const Footer = (): React.JSX.Element => {
           <div className="flex justify-center items-center gap-4">
             <Link
               className="rounded-full bg-base-blue brightness-75 w-10 h-10 flex justify-center items-center duration-300 hover:brightness-125"
-              href="/">
-              <InstagramLogo size={20}/>
+              href="/"
+            >
+              <InstagramLogo size={20} />
             </Link>
             <Link
               className="rounded-full bg-base-blue brightness-75 w-10 h-10 flex justify-center items-center duration-300 hover:brightness-125"
-              href="/">
-              <YoutubeLogo size={20}/>
+              href="/"
+            >
+              <YoutubeLogo size={20} />
             </Link>
             <Link
               className="rounded-full bg-base-blue brightness-75 w-10 h-10 flex justify-center items-center duration-300 hover:brightness-125"
-              href="/">
-              <TwitterLogo size={20}/>
+              href="/"
+            >
+              <TwitterLogo size={20} />
             </Link>
             <Link
               className="rounded-full bg-base-blue brightness-75 w-10 h-10 flex justify-center items-center duration-300 hover:brightness-125"
-              href="/">
-              <Browser size={20}/>
+              href="/"
+            >
+              <Browser size={20} />
             </Link>
           </div>
         </div>
@@ -77,20 +77,13 @@ const Footer = (): React.JSX.Element => {
             </li>
           </ul>
         </div>
-        <div className="capitalize mt-16">
-          <h3 className="text-xl text-white font-semibold mb-6">nosso grupo</h3>
-          <form className="flex justify-between w-64 h-10 bg-white rounded">
-            <input className="outline-0 rounded pl-1.5" type="text" placeholder="Seu número de telefone aqui"/>
-            <button className="pr-1.5" type="submit">
-              <PaperPlaneTilt size={20}/>
-            </button>
-          </form>
-        </div>
-        <div className="lg:hidden mt-6 mb-2 text-white lg:my-10">
+        <OurGroup />
+        <div className="lg:hidden mt-6 mb-2 text-white lg:my-10 flex flex-col items-center gap-3 text-center">
           <p>Copyright © {new Date().getFullYear()} Hidradenite Supurativa Brasil</p>
           <p>All rights reserved</p>
         </div>
       </div>
+      <CreatedBy />
     </footer>
   )
 }
