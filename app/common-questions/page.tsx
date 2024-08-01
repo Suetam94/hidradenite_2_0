@@ -3,7 +3,7 @@ import Footer from '@/app/ui/footer'
 import { readCommonQuestions } from '@/app/lib/CommonQuestion'
 import FAQList from '@/app/ui/common-questions/common-questions-list'
 
-export default async function CommonQuestions(): Promise<React.JSX.Element> {
+export default async function CommonQuestions (): Promise<React.JSX.Element> {
   const questions = await readCommonQuestions()
 
   return (
